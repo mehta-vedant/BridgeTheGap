@@ -2,9 +2,17 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="R&B Bridge Lifecycle API", version="0.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://bridge-the-gap-dusky.vercel.app", "http://localhost:3000"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 projects = [{"id": "PRJ-001", "name": "Mahi River Bridge Rehabilitation", "status": "TENDER_OPEN", "estimate": 12500000, "division": "Vadodara"}]
 tenders = [{"id": "TEN-001", "project_id": "PRJ-001", "status": "OPEN", "bids": [{"id": "BID-001", "contractor": "Saffron Infrastructure", "amount": 11850000}, {"id": "BID-002", "contractor": "Narmada Works", "amount": 12100000}]}]
