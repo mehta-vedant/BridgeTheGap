@@ -36,6 +36,17 @@ def mvp_id(value: str) -> str:
 def seed_mvp_demo(session: Session) -> None:
     """Seed a single synthetic end-to-end bridge story without external data claims."""
     if session.scalar(select(Asset.id).limit(1)):
+        role_catalogue = [
+            ("CHIEF_ENGINEER", "Chief Engineer"), ("SUPERINTENDING_ENGINEER", "Superintending Engineer"),
+            ("EXECUTIVE_ENGINEER", "Executive Engineer"), ("INSPECTOR", "Inspector / Assistant or Deputy Engineer"),
+            ("QUALITY_ENGINEER", "Quality Engineer"), ("FINANCE", "Divisional Accountant / Finance"),
+            ("CONTRACTOR", "Contractor"), ("AUDITOR", "Auditor / Viewer"), ("STATE_ADMIN", "State Administrator"),
+        ]
+        known = set(session.scalars(select(RoleDefinition.code)).all())
+        for index, (code, name) in enumerate(role_catalogue, start=100):
+            if code not in known:
+                session.add(RoleDefinition(id=mvp_id(str(index)), code=code, name=name))
+        session.commit()
         return
 
     division = OrganisationUnit(id=mvp_id("1"), name="Vadodara Bridge Division", kind="DIVISION", code="VAD-BRD")
@@ -48,6 +59,8 @@ def seed_mvp_demo(session: Session) -> None:
         RoleDefinition(id=mvp_id("14"), code="CONTRACTOR", name="Contractor"),
         RoleDefinition(id=mvp_id("15"), code="QUALITY_ENGINEER", name="Quality Engineer"),
         RoleDefinition(id=mvp_id("16"), code="FINANCE", name="Divisional Accountant"),
+        RoleDefinition(id=mvp_id("17"), code="CHIEF_ENGINEER", name="Chief Engineer"),
+        RoleDefinition(id=mvp_id("18"), code="AUDITOR", name="Auditor / Viewer"),
     ]
     users = {user.email: user for user in session.scalars(select(User)).all()}
     company = ContractorCompany(id=mvp_id("20"), legal_name="Saffron Infrastructure", registration_reference="SYNTHETIC-DEMO-001", registration_circle_id=division.id)

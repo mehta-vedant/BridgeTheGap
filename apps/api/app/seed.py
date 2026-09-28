@@ -17,11 +17,17 @@ def seed_demo_data(session: Session) -> None:
             Bridge(id="BRG-001", code="GJ-RB-042", name="Mahi River Bridge", next_inspection="2026-10-15"),
             LifecycleEvent(id="EVT-001", bridge_id="BRG-001", actor="Executive Engineer", message="Demo bridge passport created from handover record."),
         ])
-    if not session.scalar(select(User.id).limit(1)):
-        session.add_all([
-            User(id="USR-MANAGER", email="manager@demo.local", name="Project Manager", role="MANAGER", password_hash=hash_password("DemoPass123")),
-            User(id="USR-ENGINEER", email="engineer@demo.local", name="Executive Engineer", role="EXECUTIVE_ENGINEER", password_hash=hash_password("DemoPass123")),
-            User(id="USR-INSPECTOR", email="inspector@demo.local", name="Bridge Inspector", role="INSPECTOR", password_hash=hash_password("DemoPass123")),
-            User(id="USR-CONTRACTOR", email="contractor@demo.local", name="Saffron Site Lead", role="CONTRACTOR", contractor_name="Saffron Infrastructure", password_hash=hash_password("DemoPass123")),
-        ])
+    users = [
+        User(id="USR-MANAGER", email="manager@demo.local", name="Project Manager", role="MANAGER", password_hash=hash_password("DemoPass123")),
+        User(id="USR-ENGINEER", email="engineer@demo.local", name="Executive Engineer", role="EXECUTIVE_ENGINEER", password_hash=hash_password("DemoPass123")),
+        User(id="USR-INSPECTOR", email="inspector@demo.local", name="Bridge Inspector", role="INSPECTOR", password_hash=hash_password("DemoPass123")),
+        User(id="USR-CONTRACTOR", email="contractor@demo.local", name="Saffron Site Lead", role="CONTRACTOR", contractor_name="Saffron Infrastructure", password_hash=hash_password("DemoPass123")),
+        User(id="USR-CHIEF", email="chiefengineer@demo.local", name="Chief Engineer", role="CHIEF_ENGINEER", password_hash=hash_password("DemoPass123")),
+        User(id="USR-SUPERINTENDENT", email="superintendent@demo.local", name="Superintending Engineer", role="SUPERINTENDING_ENGINEER", password_hash=hash_password("DemoPass123")),
+        User(id="USR-QUALITY", email="quality@demo.local", name="Quality Engineer", role="QUALITY_ENGINEER", password_hash=hash_password("DemoPass123")),
+        User(id="USR-FINANCE", email="finance@demo.local", name="Divisional Accountant", role="FINANCE", password_hash=hash_password("DemoPass123")),
+        User(id="USR-AUDITOR", email="auditor@demo.local", name="Audit Viewer", role="AUDITOR", password_hash=hash_password("DemoPass123")),
+    ]
+    existing_emails = set(session.scalars(select(User.email)).all())
+    session.add_all([user for user in users if user.email not in existing_emails])
     session.commit()

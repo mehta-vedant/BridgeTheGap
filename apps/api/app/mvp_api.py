@@ -13,7 +13,7 @@ from .models import User
 from .mvp_models import (
     Asset, ATR, AuditEvent, BridgeProfile, CompanyUserMembership, ContractRecord,
     DefectRecord, GateDefinition, GateEvaluation, InspectionRecord, Milestone,
-    PolicyVersion, PriceVariationClaim, ProjectRecord,
+    OrganisationUnit, PolicyVersion, PriceVariationClaim, ProjectRecord,
     RoleDefinition, ServiceStateRequest, TenderBidRecord, TenderRecord, TestEvaluation,
     TestSample, QualityTest, UserRoleAssignment, WorkOrderRecord, RectificationSubmission,
     WorkVerification,
@@ -25,6 +25,8 @@ router = APIRouter(prefix="/api/mvp", tags=["Lifecycle MVP"])
 ROLE_FALLBACKS = {
     "MANAGER": "STATE_ADMIN", "EXECUTIVE_ENGINEER": "EXECUTIVE_ENGINEER",
     "INSPECTOR": "INSPECTOR", "CONTRACTOR": "CONTRACTOR",
+    "CHIEF_ENGINEER": "STATE_ADMIN", "SUPERINTENDING_ENGINEER": "SUPERINTENDING_ENGINEER",
+    "QUALITY_ENGINEER": "QUALITY_ENGINEER", "FINANCE": "FINANCE", "AUDITOR": "AUDITOR",
 }
 
 
@@ -69,6 +71,20 @@ class TestInput(BaseModel):
     test_type: str = Field(min_length=3, max_length=80)
     specified_value: Decimal = Field(gt=0)
     samples: list[Decimal] = Field(min_length=1, max_length=20)
+
+
+class PassportCreateInput(BaseModel):
+    asset_code: str = Field(pattern=r"^[A-Z0-9-]{6,64}$")
+    canonical_name: str = Field(min_length=5, max_length=240)
+    district: str = Field(min_length=2, max_length=100)
+    bridge_class: str = Field(pattern=r"^(MAJOR_BRIDGE|MINOR_BRIDGE|ROB|RUB|CULVERT)$")
+    route_name: str = Field(min_length=3, max_length=180)
+    chainage_km: Decimal | None = Field(default=None, ge=0, max_digits=12, decimal_places=3)
+    length_m: Decimal | None = Field(default=None, gt=0, max_digits=12, decimal_places=2)
+    span_count: int | None = Field(default=None, ge=1, le=100)
+    project_title: str = Field(min_length=5, max_length=240)
+    project_type: str = Field(default="NEW_CONSTRUCTION", pattern=r"^(NEW_CONSTRUCTION|REHABILITATION|REPLACEMENT)$")
+    estimate_amount: Decimal = Field(gt=0, max_digits=15, decimal_places=2)
 
 
 def session_dependency():
@@ -116,9 +132,15 @@ def asset_view(asset: Asset, profile: BridgeProfile | None = None) -> dict:
     }
 
 
+@router.get("/admin/roles")
+def list_role_definitions(user: User = Depends(get_current_user), session: Session = Depends(session_dependency)) -> dict:
+    require(session, user, "STATE_ADMIN")
+    return {"items": [{"code": role.code, "name": role.name} for role in session.scalars(select(RoleDefinition).order_by(RoleDefinition.name)).all()]}
+
+
 @router.get("/dashboard")
 def dashboard(user: User = Depends(get_current_user), session: Session = Depends(session_dependency)) -> dict:
-    require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER", "SUPERINTENDING_ENGINEER", "INSPECTOR", "CONTRACTOR")
+    require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER", "SUPERINTENDING_ENGINEER", "INSPECTOR", "CONTRACTOR", "QUALITY_ENGINEER", "FINANCE", "AUDITOR")
     open_defects = session.scalar(select(func.count()).select_from(DefectRecord).where(DefectRecord.status != "CLOSED")) or 0
     failed_gates = session.scalar(select(func.count()).select_from(GateEvaluation).where(GateEvaluation.status == "FAILED")) or 0
     today = datetime.now(UTC).date()
@@ -134,7 +156,7 @@ def dashboard(user: User = Depends(get_current_user), session: Session = Depends
 
 @router.get("/assets")
 def list_assets(q: str | None = None, lifecycle_state: str | None = None, service_state: str | None = None, limit: int = 50, user: User = Depends(get_current_user), session: Session = Depends(session_dependency)) -> dict:
-    require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER", "SUPERINTENDING_ENGINEER", "INSPECTOR", "CONTRACTOR")
+    require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER", "SUPERINTENDING_ENGINEER", "INSPECTOR", "CONTRACTOR", "QUALITY_ENGINEER", "FINANCE", "AUDITOR")
     query = select(Asset).order_by(Asset.asset_code).limit(min(limit, 100))
     if lifecycle_state:
         query = query.where(Asset.lifecycle_state == lifecycle_state)
@@ -148,9 +170,29 @@ def list_assets(q: str | None = None, lifecycle_state: str | None = None, servic
     return {"items": result, "limit": min(limit, 100)}
 
 
+@router.post("/assets", status_code=status.HTTP_201_CREATED)
+def create_bridge_passport(payload: PassportCreateInput, user: User = Depends(get_current_user), session: Session = Depends(session_dependency)) -> dict:
+    """Create the permanent bridge identity and its initiating project atomically."""
+    require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER")
+    if session.scalar(select(Asset.id).where(Asset.asset_code == payload.asset_code)):
+        raise HTTPException(status.HTTP_409_CONFLICT, "An asset with this code already exists")
+    assignment = session.scalar(select(UserRoleAssignment).where(UserRoleAssignment.user_id == user.id, UserRoleAssignment.organisation_unit_id.is_not(None), UserRoleAssignment.effective_to.is_(None)))
+    owner_unit_id = assignment.organisation_unit_id if assignment else session.scalar(select(OrganisationUnit.id).where(OrganisationUnit.kind == "DIVISION").limit(1))
+    if not owner_unit_id:
+        raise HTTPException(status.HTTP_409_CONFLICT, "No owning division is configured for this user")
+    asset = Asset(id=uid("ASSET"), asset_code=payload.asset_code, asset_type="BRIDGE", canonical_name=payload.canonical_name, owner_unit_id=owner_unit_id, lifecycle_state="SANCTION_AND_CLEARANCE", service_state="OPEN", condition_grade=None, risk_flag=None, district=payload.district)
+    profile = BridgeProfile(asset_id=asset.id, bridge_class=payload.bridge_class, route_name=payload.route_name, chainage_km=payload.chainage_km, length_m=payload.length_m, span_count=payload.span_count)
+    project = ProjectRecord(id=uid("PROJ"), asset_id=asset.id, owner_unit_id=owner_unit_id, project_type=payload.project_type, title=payload.project_title, state="SANCTION_AND_CLEARANCE", estimate_amount=payload.estimate_amount, created_by_id=user.id)
+    tender = TenderRecord(id=uid("TEN"), project_id=project.id, tender_number=f"DRAFT-{payload.asset_code[-12:]}", status="DRAFT", estimated_cost=payload.estimate_amount, invited_by_id=user.id)
+    session.add_all([asset, profile, project, tender])
+    audit(session, user, asset.id, "ASSET", asset.id, "ASSET_PASSPORT_CREATED", new_value={"asset_code": asset.asset_code, "project_id": project.id, "lifecycle_state": asset.lifecycle_state}, reason="Executive Engineer initiated permanent bridge identity and sanction-stage project.")
+    session.commit()
+    return {"asset": asset_view(asset, profile), "project_id": project.id, "tender_id": tender.id, "next_action": "Record clearance evidence and evaluate the land-readiness gate before tender publication."}
+
+
 @router.get("/assets/{asset_id}/passport")
 def asset_passport(asset_id: str, user: User = Depends(get_current_user), session: Session = Depends(session_dependency)) -> dict:
-    require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER", "SUPERINTENDING_ENGINEER", "INSPECTOR", "CONTRACTOR")
+    require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER", "SUPERINTENDING_ENGINEER", "INSPECTOR", "CONTRACTOR", "QUALITY_ENGINEER", "FINANCE", "AUDITOR")
     asset = get_asset(session, asset_id)
     project = session.scalar(select(ProjectRecord).where(ProjectRecord.asset_id == asset.id))
     tender = session.scalar(select(TenderRecord).where(TenderRecord.project_id == project.id)) if project else None
