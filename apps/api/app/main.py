@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 
 from .database import SessionLocal
 from .models import Bid, Bridge, LifecycleEvent, Project, Tender, User, WorkOrder
+from .mvp_api import router as mvp_router
+from .mvp_seed import seed_mvp_demo
 from .security import create_access_token, get_current_user, require_roles, verify_password
 from .seed import seed_demo_data
 
@@ -18,6 +20,7 @@ from .seed import seed_demo_data
 async def lifespan(_: FastAPI):
     with SessionLocal() as session:
         seed_demo_data(session)
+        seed_mvp_demo(session)
     yield
 
 
@@ -29,6 +32,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(mvp_router)
 
 
 class LoginRequest(BaseModel):
