@@ -32,6 +32,7 @@ from .lifecycle import (
     phase_facts,
     phase_gates,
     scope_asset_query,
+    scope_criteria,
     scope_explanation,
 )
 from .models import User
@@ -329,7 +330,13 @@ def dashboard(user: User = Depends(get_current_user), session: Session = Depends
         "phases": phases,
         "phase_order": [PHASE_PRE, PHASE_BUILD, PHASE_POST],
         "districts": districts,
-        "scope": {"roles": sorted(roles), "explanation": scope_explanation(roles), "assets_visible": len(assets)},
+        "scope": {
+            "roles": sorted(roles),
+            "explanation": scope_explanation(roles),
+            "assets_visible": len(assets),
+            "criteria": scope_criteria(roles),
+            "restricted": len(assets) < (session.scalar(select(func.count()).select_from(Asset)) or 0),
+        },
         "register": [
             {
                 "id": asset.id,
@@ -420,6 +427,7 @@ def list_assets(
         "scope": {
             "roles": sorted(roles),
             "explanation": scope_explanation(roles),
+            "criteria": scope_criteria(roles),
             "assets_visible": scope_total,
             "restricted": scope_total < (session.scalar(select(func.count()).select_from(Asset)) or 0),
         },

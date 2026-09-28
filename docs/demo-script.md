@@ -78,7 +78,8 @@ shows where it came from. No slides, no transitions, no music.
 **VO:**
 
 > Refused. And look at what it says: the **code**, the missing requirement, the
-> remediation step, and the source. *GPWM Clause 212-A, GR 10-05-2013.*
+> remediation step, and the source — *section 2.5 of our research record, ninety
+> percent possession and the handover memorandum.*
 
 **VO:**
 
@@ -87,6 +88,28 @@ shows where it came from. No slides, no transitions, no music.
 > established"* — where we could not find an official answer — **the system
 > returns 501 rather than inventing a value.** A plausible number that nobody
 > can defend is worse than no number.
+
+**Action:** record 95% possession and the memo. Publish. Sign in as Contractor,
+bid. Back as Executive Engineer — award.
+
+**VO:**
+
+> Now watch the award. Two sourced numbers appear that nobody typed: the
+> security deposit at three percent and the performance bond at three percent.
+> And the tender had to clear a **one-hundred-and-twenty-day acceptance rule**
+> first — *GPWM Clause 212-A, Government Resolution 10-05-2013.* Miss that
+> window and the tender must be re-invited. In Mehsana that re-tender cost five
+> and a half to six crore.
+
+**VO:**
+
+> Three layers of approval, each one recorded: the Executive Engineer invited
+> it, the Superintending Engineer of the circle opened it, the Department
+> approved it. CAG found a miscalculation that passed all three layers
+> uncaught. That is why each layer is a recorded step and not a status change.
+
+**On screen:** the award response, showing the derived phase has moved to
+Execution.
 
 ---
 

@@ -177,6 +177,73 @@ def test_dashboard_counts_are_scoped_not_departmental(client: TestClient):
     assert sum(contractor_body["phases"].values()) == contractor_body["metrics"]["assets"]
 
 
+def test_an_out_of_scope_absence_is_explained_not_silent(client: TestClient):
+    """A restricted register must publish the rule that produced it.
+
+    A contractor watching a newly created bridge fail to appear cannot tell a
+    deliberate access boundary from a defect. D-016 and D-019 both decided that
+    a silent omission is not acceptable, so the criteria travel with the
+    register rather than living only in the source.
+    """
+    contractor = login(client, "contractor@demo.local")
+    for path in ("/api/mvp/assets", "/api/mvp/dashboard"):
+        scope = client.get(path, headers=auth(contractor)).json()["scope"]
+        assert scope["restricted"] is True
+        assert scope["criteria"], f"{path} must publish its scope criteria"
+        assert any("published" in item.lower() for item in scope["criteria"]), (
+            "the contractor criteria must state that a tender is internal until published, "
+            "because that is the rule that keeps a new bridge out of their scope"
+        )
+        # The criteria explain the rule without enumerating what is withheld.
+        assert "assets_hidden" not in scope
+        assert "excluded" not in scope
+
+
+def test_a_new_asset_enters_contractor_scope_only_once_its_tender_is_published(client: TestClient):
+    """The behaviour that looked like a bug, pinned down as intended.
+
+    Creating a bridge creates a DRAFT tender. A draft is the department's
+    internal commercial position, so it must not reach bidders. Publication is
+    the act that opens the tender room. The transition is the whole point, so it
+    is tested in both directions.
+    """
+    engineer = login(client, "engineer@demo.local")
+    contractor = login(client, "contractor@demo.local")
+
+    created = client.post("/api/mvp/assets", headers=auth(engineer), json={
+        "canonical_name": "Scope transition probe bridge", "district": "Anand",
+        "bridge_class": "MAJOR_BRIDGE", "route_name": "SH 83",
+        "length_m": 60, "span_count": 2, "project_title": "Scope probe",
+        "project_type": "NEW_CONSTRUCTION", "estimate_amount": 7500000,
+    })
+    assert created.status_code == 201, created.text
+    body = created.json()
+    asset_id, project_id, tender_id = body["asset"]["id"], body["project_id"], body["tender_id"]
+
+    def contractor_sees() -> bool:
+        items = client.get("/api/mvp/assets", headers=auth(contractor)).json()["items"]
+        return any(item["id"] == asset_id for item in items)
+
+    # A draft tender is internal. The contractor must not see the bridge.
+    assert client.get(f"/api/mvp/assets/{asset_id}/passport", headers=auth(engineer)).json()["tender"]["status"] == "DRAFT"
+    assert contractor_sees() is False
+
+    # Publication opens the tender room, and the bridge becomes visible.
+    client.post(
+        f"/api/mvp/projects/{project_id}/land-readiness",
+        headers=auth(engineer),
+        json={"possession_percent": 95, "handover_reference": "MEMO-SCOPE-PROBE"},
+    )
+    assert client.post(f"/api/mvp/tenders/{tender_id}/publish", headers=auth(engineer)).status_code == 200
+    assert contractor_sees() is True
+
+    # And the notice is public while the tender room is not: the contractor can
+    # open the passport and bid, without seeing any competing price.
+    passport = client.get(f"/api/mvp/assets/{asset_id}/passport", headers=auth(contractor)).json()
+    assert passport["tender"]["status"] == "PUBLISHED"
+    assert all(bid["redacted"] or bid["own_bid"] for bid in passport["bids"])
+
+
 # ---------------------------------------------------------------------------
 # The bid path end to end
 # ---------------------------------------------------------------------------

@@ -266,6 +266,28 @@ VISIBILITY_RULES = {
     ),
 }
 
+# The criteria are stated to the user, not just to the reader of this file.
+# A register that silently omits an asset is indistinguishable from a broken
+# one, which is the same failure mode D-016 fixed for the register and D-019
+# fixed for authorization. Publishing the rule is what makes an absence
+# explicable without revealing what is being withheld: a contractor is told
+# that a tender becomes visible when the department publishes it, and is never
+# told that a particular internal draft exists.
+SCOPE_CRITERIA: dict[str, list[str]] = {
+    "engineers_and_auditors": [
+        "You see the whole register, so a proposal can be judged against a bridge already in service.",
+    ],
+    "inspectors_quality_finance": [
+        "You see bridges that have been awarded, because your work acts on a physical structure.",
+        "A bridge enters your scope the moment a contract is awarded, not when it is proposed.",
+    ],
+    "contractors": [
+        "You see a bridge when its tender is open for bidding, when your own company holds the contract, or when your own company holds a work order against a defect.",
+        "A tender stays internal to the department until it is published. Creating or drafting a tender does not expose it to bidders, and that is deliberate: a draft carries the department's commercial position before it is released.",
+        "You never see another company's contract, work order, bid price or commercial position.",
+    ],
+}
+
 # A tender notice is published by design -- nProcure makes it public -- so a
 # contractor must be able to see a tender it has not yet won. What stays private
 # is the *bids*: the notice is public, the tender room is not. Omitting this
@@ -352,3 +374,18 @@ def scope_explanation(roles: set[str]) -> str:
     if roles & CONTRACTOR_ROLES:
         return VISIBILITY_RULES["contractors"]
     return VISIBILITY_RULES["inspectors_quality_finance"]
+
+
+def scope_criteria(roles: set[str]) -> list[str]:
+    """The same rule, broken into the clauses a user can act on.
+
+    Returned alongside the register so that an asset which is absent is
+    explicable. Without this, a contractor who watches a new bridge not appear
+    has no way to tell a deliberate access boundary from a defect, and the
+    correct behaviour reads as the broken one.
+    """
+    if roles & SEE_ALL_ROLES:
+        return list(SCOPE_CRITERIA["engineers_and_auditors"])
+    if roles & CONTRACTOR_ROLES:
+        return list(SCOPE_CRITERIA["contractors"])
+    return list(SCOPE_CRITERIA["inspectors_quality_finance"])

@@ -9,6 +9,12 @@
 .rail-head h2 { margin:4px 0 2px; font-family:Georgia,serif; font-size:1.05rem; letter-spacing:-.04em; }.rail-head strong { color:var(--forest); font-size:.8rem; }
 .rail-head input { width:100%; margin:11px 0 4px; padding:8px 10px; border:1px solid var(--line); border-radius:7px; background:var(--paper); font:inherit; font-size:.79rem; }
 .rail-warn { margin:6px 0 0; color:var(--amber); font-size:.72rem; line-height:1.4; }
+/* The scope rule is shown where an asset fails to appear, so that a
+   deliberate access boundary is distinguishable from a defect. */
+.rail-scope { margin:10px 0 0; padding:9px 10px; border:1px solid #e3ddd2; border-radius:8px; background:#fbf9f5; }
+.rail-scope summary { color:var(--muted); font-size:.72rem; line-height:1.45; cursor:pointer; }
+.rail-scope ul, .scope-criteria { margin:8px 0 0; padding-left:16px; color:var(--muted); font-size:.72rem; line-height:1.55; }
+.rail-scope li, .scope-criteria li { margin-bottom:5px; }
 .rail-list { margin-top:14px; overflow-y:auto; padding-right:8px; }
 .rail-phase { display:flex; justify-content:space-between; margin:14px 0 6px; color:var(--muted); font-size:.66rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; }.rail-phase b { color:var(--ink); }
 .rail-item { display:block; width:100%; margin-bottom:5px; padding:9px 10px; border:1px solid transparent; border-radius:8px; background:transparent; text-align:left; cursor:pointer; }

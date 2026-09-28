@@ -25,7 +25,7 @@ type PhaseInfo = {
   next_phase_label: string | null;
   blockers: string[];
 };
-type ScopeInfo = { roles: string[]; explanation: string; assets_visible?: number; restricted?: boolean };
+type ScopeInfo = { roles: string[]; explanation: string; assets_visible?: number; restricted?: boolean; criteria?: string[] };
 type Passport = {
   asset: { id: string; asset_code: string; name: string; phase?: string; phase_label?: string; lifecycle_state: string; stored_state_agrees?: boolean | null; service_state: string; condition_?: string; condition_grade: string; district: string; latitude?: number; longitude?: number; bridge?: { class?: string; route?: string; length_m?: number; span_count?: number } };
   phase?: PhaseInfo;
@@ -233,7 +233,10 @@ function AssetRail({ assets, activeId, total, truncated, scope, onSelect }: { as
       <strong>{total} assets</strong>
       <input aria-label="Search the bridge register" placeholder="Search code, name, district" value={query} onChange={(event) => setQuery(event.target.value)} />
       {truncated && <p className="rail-warn">Showing {assets.length} of {total}. Narrow the search to reach the rest.</p>}
-      {scope?.restricted && <p className="rail-scope" title={scope.explanation}>Scoped to your role: {scope.explanation}</p>}
+      {scope?.restricted && <details className="rail-scope" open>
+        <summary>Scoped to your role — {scope.explanation}</summary>
+        <ul>{scope.criteria?.map((item) => <li key={item}>{item}</li>)}</ul>
+      </details>}
     </div>
     <div className="rail-list">
       {groups.map((group) => group.rows.length ? <section key={group.key}>
@@ -245,7 +248,10 @@ function AssetRail({ assets, activeId, total, truncated, scope, onSelect }: { as
         </button>)}
       </section> : null)}
       {other.length ? <section><p className="rail-phase">Other <b>{other.length}</b></p>{other.map((asset) => <button key={asset.id} className={asset.id === activeId ? "rail-item active" : "rail-item"} onClick={() => void onSelect(asset.id)}><b>{asset.name}</b><small>{asset.asset_code}</small></button>)}</section> : null}
-      {!visible.length && <p className="empty">No bridge matches that search.</p>}
+      {!visible.length && <div className="empty">
+        <p>{term ? "No bridge matches that search." : "No bridge is currently in your scope."}</p>
+        {!term && scope?.criteria?.length ? <ul className="scope-criteria">{scope.criteria.map((item) => <li key={item}>{item}</li>)}</ul> : null}
+      </div>}
     </div>
   </nav>;
 }
