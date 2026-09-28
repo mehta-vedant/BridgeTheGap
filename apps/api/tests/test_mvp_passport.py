@@ -52,3 +52,13 @@ def test_contractor_cannot_create_bridge_passport() -> None:
         contractor = login(client, "contractor@demo.local")
         response = client.post("/api/mvp/assets", json=new_passport_payload(), headers=contractor)
         assert response.status_code == 403
+
+
+def test_blank_asset_code_is_generated() -> None:
+    with TestClient(app) as client:
+        engineer = login(client, "engineer@demo.local")
+        payload = new_passport_payload()
+        payload["asset_code"] = ""
+        created = client.post("/api/mvp/assets", json=payload, headers=engineer)
+        assert created.status_code == 201
+        assert created.json()["asset"]["asset_code"].startswith("BRG-GJ-VAD-")

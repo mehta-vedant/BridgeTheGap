@@ -4,7 +4,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -87,6 +87,11 @@ class PassportCreateInput(BaseModel):
     estimate_amount: Decimal = Field(gt=0, max_digits=15, decimal_places=2)
     latitude: Decimal | None = Field(default=None, ge=-90, le=90, max_digits=9, decimal_places=6)
     longitude: Decimal | None = Field(default=None, ge=-180, le=180, max_digits=9, decimal_places=6)
+
+    @field_validator("asset_code", mode="before")
+    @classmethod
+    def blank_asset_code_means_generate(cls, value: object) -> object:
+        return None if isinstance(value, str) and not value.strip() else value
 
 
 class ReportInput(BaseModel):
