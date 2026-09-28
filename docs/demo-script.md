@@ -34,8 +34,14 @@ shows where it came from. No slides, no transitions, no music.
 
 **VO:**
 
-> Nine bridges, grouped by lifecycle phase. Three per phase, because the point
-> is to show all three stages of the asset's life in one view.
+> This is the whole register. Every bridge the department holds, grouped by
+> lifecycle phase — the proposed ones, the ones being built, the ones in
+> service.
+
+> **Do not say a bridge count or a per-phase split.** A fresh database seeds
+> nine bridges and the derived split is whatever the records say, not an even
+> three-three-three. An even split was the old hand-labelled seed and it was
+> wrong. Let the screen carry the number; a wrong one is worse than none.
 
 **Action:** click the search box, type a district.
 
@@ -174,7 +180,7 @@ elapsed.
 > phases derived from records, authority enforced in the query, and a defect
 > liability period that only opens for a bridge that was actually built.
 
-**On screen:** hold on the register. All nine bridges. Nothing hidden.
+**On screen:** hold on the register. Every bridge. Nothing hidden.
 
 ---
 
