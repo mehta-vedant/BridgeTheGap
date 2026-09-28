@@ -96,5 +96,18 @@ def seed_mvp_demo(session: Session) -> None:
         UserRoleAssignment(id=mvp_id("79"), user_id=users["finance@demo.local"].id, role_id=role_by_code["FINANCE"].id, organisation_unit_id=division.id),
         UserRoleAssignment(id=mvp_id("80"), user_id=users["auditor@demo.local"].id, role_id=role_by_code["AUDITOR"].id, organisation_unit_id=division.id),
     ]
-    session.add_all([division, circle, *roles, company, source, land_policy, pv_policy, gate, asset, profile, AssetComponent(id=mvp_id("44"), asset_id=asset.id, component_type="DECK", component_label="Deck drainage joint"), project, evaluation, tender, inspection, defect, atr, *events, *assignments])
+    # This deliberately flushes each lifecycle layer.  The models use explicit
+    # foreign-key IDs rather than SQLAlchemy relationship objects, so PostgreSQL
+    # cannot infer insertion order from the Python object graph.
+    session.add_all([division, circle, *roles, company, source])
+    session.flush()
+    session.add_all([land_policy, pv_policy, gate, asset])
+    session.flush()
+    session.add_all([profile, AssetComponent(id=mvp_id("44"), asset_id=asset.id, component_type="DECK", component_label="Deck drainage joint"), project])
+    session.flush()
+    session.add_all([evaluation, tender, inspection])
+    session.flush()
+    session.add(defect)
+    session.flush()
+    session.add_all([atr, *events, *assignments])
     session.commit()
