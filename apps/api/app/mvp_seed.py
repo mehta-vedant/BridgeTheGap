@@ -90,6 +90,11 @@ def seed_mvp_demo(session: Session) -> None:
         UserRoleAssignment(id=mvp_id("73"), user_id=users["contractor@demo.local"].id, role_id=role_by_code["CONTRACTOR"].id, organisation_unit_id=division.id),
         CompanyUserMembership(id=mvp_id("74"), company_id=company.id, user_id=users["contractor@demo.local"].id),
         ContractorClassHistory(id=mvp_id("75"), company_id=company.id, class_code="SPECIAL_CATEGORY_I_BRIDGES", effective_from=date(2025, 1, 1), source_reference="Synthetic demo registration history"),
+        UserRoleAssignment(id=mvp_id("76"), user_id=users["chiefengineer@demo.local"].id, role_id=role_by_code["CHIEF_ENGINEER"].id, organisation_unit_id=circle.id),
+        UserRoleAssignment(id=mvp_id("77"), user_id=users["superintendent@demo.local"].id, role_id=role_by_code["SUPERINTENDING_ENGINEER"].id, organisation_unit_id=circle.id),
+        UserRoleAssignment(id=mvp_id("78"), user_id=users["quality@demo.local"].id, role_id=role_by_code["QUALITY_ENGINEER"].id, organisation_unit_id=division.id),
+        UserRoleAssignment(id=mvp_id("79"), user_id=users["finance@demo.local"].id, role_id=role_by_code["FINANCE"].id, organisation_unit_id=division.id),
+        UserRoleAssignment(id=mvp_id("80"), user_id=users["auditor@demo.local"].id, role_id=role_by_code["AUDITOR"].id, organisation_unit_id=division.id),
     ]
     session.add_all([division, circle, *roles, company, source, land_policy, pv_policy, gate, asset, profile, AssetComponent(id=mvp_id("44"), asset_id=asset.id, component_type="DECK", component_label="Deck drainage joint"), project, evaluation, tender, inspection, defect, atr, *events, *assignments])
     session.commit()
