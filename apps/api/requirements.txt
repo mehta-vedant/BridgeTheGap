@@ -7,7 +7,7 @@ pydantic-settings>=2.6,<3
 PyJWT>=2.10,<3
 passlib[bcrypt]>=1.7,<2
 # Passlib 1.7.x is incompatible with bcrypt 5's strict 72-byte backend check.
-bcrypt>=4,<5
+bcrypt==4.0.1
 pytest>=8,<9
 httpx>=0.28,<1
 ruff>=0.8,<1
