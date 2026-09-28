@@ -668,7 +668,9 @@ before implementation."
   is precisely the field an inquiry would need to establish whether a known
   defect was carried forward.
 - India's own road asset management standard, **IRC:130-2020, states in its
-  scope that it "does not cover Bridge Assets"**.
+  scope that it "does not cover Bridge Assets"**. Quotable as evidence of the
+  exclusion. **Never** quotable as authority for a rule about bridge records —
+  see the correction note under D-008 Amendment 1 and D-009.
 
 **Conclusion: the risk is downgraded, not dismissed.** The class stands. What
 must not be claimed is that IBMS is absent or poor. The demo must open by
@@ -735,11 +737,12 @@ rupee figure in it:
 | Finding | Figure | Source |
 |---|---|---|
 | Maintenance norms flouted | **199%-346% above** norms; 161 works granted time extension with no liquidated damages recovered | CAG Gujarat Civil Report 2001, Ch. IV |
-| Capital blocked in stalled projects | R&B **Rs. 11,146 cr** capex; **168 projects >= Rs. 10 cr incomplete**; Rs. 5,194 cr spent against Rs. 7,353 cr estimated | CAG SFAR 2023-24 |
+| Sanctioned work with zero delivery | **33 CRIF road projects sanctioned at Rs. 904.54 cr, expenditure reported: Nil** | RS US Q 1057, 4 Dec 2024 |
+| Irregularity in Gujarat R&B money, full audit period | **Rs. 8.75 cr across 5 paragraphs** — Rs. 4.74 cr price-variation overpayment, Rs. 2.40 cr bonus, Rs. 2.21 cr bid-validity overrun, Rs. 1.62 cr curve widening | CAG Gujarat Rep. 1 of 2026, paras 3.6-3.11 |
 | Sanctioned repair not executed | Gambhira: **Rs. 212 cr replacement approved before the collapse**; sanctioned four days after it | State of Gujarat's own account |
 | Wasteful expenditure | Rs. 1.35 cr avoidable; Rs. 73.04 lakh lease premium; Rs. 112.37 lakh unfruitful; **Rs. 2.78 cr idle or blocked** | CAG Gujarat Audit Report No. 4 of 2014 |
 | Forward-looking record schema | Five-part maintenance record with estimated cost, recommended action date, and a 60-year plan **with assumptions recorded** | UK CG 302 |
-| Valuation discipline | Four valuation approaches; investment-backlog estimation; network vs project decision levels | IRC:130-2020 |
+| Valuation discipline | Four valuation approaches; investment-backlog estimation; network vs project decision levels | IRC:130-2020, **borrowed as method only** — it is a roads-only standard and its scope excludes bridge assets, so applying it to a bridge register is an extension, not a citation |
 
 A product that cannot produce these numbers per asset is leaving the strongest
 available evidence on the table.
@@ -763,7 +766,7 @@ reference — captured once at entry and never managed as a phase.
 |---|---|---|---|
 | C1 | Capital, read-only provenance | MVP | Contract cost, year, design life, as-built reference. Immutable. |
 | C2 | Maintenance spend, accrued | MVP | Cost to date, cost per service-year, cost trend. Makes the 199%-346% finding per-asset. |
-| C3 | **Deferred sanctioned work** | **MVP, highest value** | "Rs. 4.2 cr sanctioned 2024-03, not executed, 611 days overdue." The direct per-bridge answer to the PAC's 168 stalled projects. |
+| C3 | **Deferred sanctioned work** | **MVP, highest value** | "Rs. 4.2 cr sanctioned 2024-03, not executed, 611 days overdue." The per-bridge answer to 33 CRIF projects sanctioned at Rs. 904.54 cr with Nil expenditure reported. |
 | C4 | Lifecycle projection, 60-year | Stretch | Next intervention and cost from condition trend and component lives, assumptions recorded. |
 | C5 | Exposure at risk | MVP, **as a refusal** | Capital at risk, days critical, vehicles per day over an unsafe structure, district. |
 
@@ -924,8 +927,19 @@ That is something a condition register cannot do. It also sharpens the
 register thesis: the 1,441 vs 6,768 discrepancy is not only about current
 structures, it is about provenance back to construction. **A register that
 cannot say when a bridge entered service cannot enforce a warranty, cannot
-prove a design life, and cannot answer a negligence claim** — and IRC:130-2020
-states that the record is the defence against exactly that claim.
+prove a design life, and cannot answer a negligence claim.**
+
+> **Corrected 28 Sep 2026.** An earlier draft of this paragraph attributed the
+> liability-shielding argument to **IRC:130-2020**. That was a misattribution and
+> it has been removed. IRC:130-2020 is *Guidelines for Road Asset Management
+> System* and its scope clause states it **"does not cover Bridge Assets."** It
+> cannot be cited as authority for anything about a bridge record. The
+> prohibition is still quotable — as evidence that India's own road asset
+> standard excludes bridges by name — but never as a positive rule.
+>
+> The correct authorities are **IRC:SP 35** (inspection and evaluation of
+> bridges) and **IRC:SP 40** (testing), and the argument should be made from an
+> adjudicated fact rather than from a design standard. See D-009.
 
 #### Explicitly not built
 
@@ -950,21 +964,52 @@ list is the boundary, and it is not to be eroded.
 network-level and project-level decision screens, and the routine-maintenance
 task list.
 
-#### The verification item this creates
+#### The defect liability period — corrected 28 Sep 2026
 
-**The defect liability period was not researched in the earlier passes.** The
-12-24 month range and the security-deposit mechanics come from general Indian
-construction-contract practice, not from a Gujarat R&B or MoRTH contract
-document that has actually been read.
+**The 12-24 month range in the original draft was wrong, and it was wrong in
+the direction that made the product look smaller.** It has been replaced by
+evidence read out of an actual contract document.
 
-Before this reaches the schema, confirm against the actual Gujarat R&B works
-contract: the DLP duration, what security is held and at what percentage, and
-**whether DLP defects actually get closed or quietly lapse.**
+| Item | Value | Source |
+|---|---|---|
+| DLP, stand-alone structures and **major bridges** | **10 years** from the Completion Certificate | NHAI/MoRTH Standard EPC **Art. 17.1(d)** |
+| DLP, ROB / RUB / rail bridges | **4 years** maintenance period | Indian Railways Railway Board letter No. 20221 CE-II/Bridge, 29 Dec 2025 |
+| DLP deemed extended | *"till the identified Defects under Clause 17.2 have been remedied"* | Art. **17.5** |
+| DLP failure, remedy | cost of rectification **plus 20% damages**, deductible from monies due | Art. **17.4** |
+| Cure period after notice | **15 days** | Art. 17 |
+| Retention | 6% deduction, **capped at 5% of Contract Price**; alternatively omitted with performance security raised 7.5% → 10% | EPC / footnote 11 swap |
+| **Retention money released** | **within 15 days of the Completion Certificate** | EPC |
+| Performance security | **5%** within 30 days of the Letter of Award | Art. |
+| Completion Certificate issued by | **the Authority's Engineer**, not the contractor | Schedule-L |
 
-That last question is the one that matters. If DLP defects routinely expire
-unclosed in Gujarat, this is a second Gambhira. If they never lapse, the gate
-is a formality. Either answer is useful. Neither is currently known, and
-neither may be assumed.
+Two consequences that must survive into the schema.
+
+**1. The DLP is not a date, it is a predicate.**
+`DLP_active = (start + 10 years) AND (open_defects == 0)`. Art. 17.5 makes an
+open defect block expiry automatically, so the "do defects actually get closed
+or quietly lapse" question has a contractual answer — the clock does not run
+out while a defect is open. Whether Gujarat enforces it is a separate and still
+unknown question.
+
+**2. Retention does not back the DLP.** The cash leaves *before* the DLP starts.
+The only security standing behind a 10-year liability is the **performance
+security**. Any model that treats retention as DLP cover is wrong, and this is
+also the most defensible thing to say out loud in an interview: the money is
+gone by day fifteen and the risk runs for a decade.
+
+> **Scope limit — this is not Gujarat R&B's contract.** The figures above are
+> NHAI/MoRTH Standard EPC. Gujarat R&B tenders on **SBD/B-1 percentage rate
+> form**, and the operative text sits in **GR TNC-1088-D-347-7-C**, which could
+> not be opened. Gujarat R&B's own DLP duration, security percentage and
+> retention terms are therefore **NOT ESTABLISHED** and must not be modelled
+> from these numbers. See D-010.
+
+**Still unknown and still not to be assumed:** whether Gujarat R&B actually
+closes DLP defects or lets them lapse. No CAG paragraph stating that retention
+was released while defects remained open has been found. What has been found
+instead is a Himachal Pradesh bridge whose defect was noticed only *after* DLP
+expiry, alongside pervasive CAG coverage of DLP working. That is suggestive,
+not proof, and the gap is recorded in `docs/known-issues.md`.
 
 #### Updated reconsideration trigger
 
@@ -972,3 +1017,986 @@ This amendment adds one: if the sponsor requires live e-tendering or payment
 processing rather than a record of a tender that has already concluded, the
 construction phase must be dropped back to provenance-only, because the
 tendering system is not a ten-hour build and is not this product.
+
+---
+
+## D-009 — The three-phase split is the *missing* taxonomy, not the established one
+
+### Context
+
+The sponsor's brief is split into pre-construction, construction, and
+post-construction. D-008 built the product on that split. Before that split
+became the organising principle of the schema, it was tested against every
+document that actually defines Indian road audit practice.
+
+**It is not the established taxonomy.** That is the finding, and it is the most
+useful thing the cross-phase pass produced.
+
+| Source | What it actually uses |
+|---|---|
+| CAG *Manual of Civil Audit Procedure 2023* (Principal Director of Audit — Infrastructure, whose portfolio includes MoRTH) | **No** pre- / construction / post-construction definition anywhere |
+| CAG Report No. 19 of 2023, MoRTH, Bharatmala Pariyojana | Functional chapters: Conceptualisation & Planning · Fund Management · Award of Projects · Execution · Monitoring & IT. **Stops at execution.** No O&M chapter |
+| CAG Report No. 8 of 2022, Karnataka, PWD road works | Planning · Sanction · Tender · Variations/Advances · Quality Control. **Explicitly excludes O&M from scope** |
+| CAG Report No. 5 of 2021 Sikkim; No. 11 of 2022 Tamil Nadu | The only two flagship roads audits that reach maintenance — both cover *two* phases, not three |
+| MoRTH | Uses "pre-construction activities" as a formal **cost category** (LS US Q 1975, 31 Jul 2025), not a lifecycle |
+| RS Standing Committee 296th Report, 28 Jul 2021 | Recommended fixing accountability *"from the stage of drafting the project report till complete project execution"* — the whole span, as a **recommendation**, not current practice |
+
+The audit universe, structurally, **ends when the contractor is paid.** O&M was
+so clearly a separate problem that Parliament had to go back for it: the
+Committee took up *"Operation and Maintenance of National Highways and
+Management of Toll Plazas"* as a **367th Report in February 2024**, three years
+after telling MoRTH to fix accountability across the whole lifecycle.
+
+### Decision
+
+**Adopt the three-phase split as the product's organising principle, and state
+in every document and every demo that it is a proposal to close a documented gap
+— never a description of how the sector currently audits.**
+
+The thesis is not "we organised things nicely." It is the sanction table.
+
+**13 structural collapses during construction. 3 structural failures of
+completed or in-service structures.** MoRTH's own annexure to **Lok Sabha
+US Q 3054, 18 Dec 2025** — 72 projects and stretches, 11 officers removed from
+service. The 13/3 split is **our own row-by-row tabulation** of that annexure
+(71 of 72 rows legible in the extracted text), not a published statistic. Its
+original citation could not be found and must not be attributed to MoRTH.
+
+The sanction asymmetry that follows is the argument:
+
+| | Under construction | Completed / in service |
+|---|---|---|
+| Debarment ≥ 12 months | 4 cases | **none** |
+| Designer-team debarment | 2 cases | **none** |
+| Government officer suspended / transferred | 3 cases + 11 removed | **none listed** |
+| Contract termination / PBG forfeiture | 3 cases | 1 case |
+
+A girder that topples while being launched gets a **two-year debarment of the
+designer team and the senior bridge engineer plus ₹1 crore** (#51,
+Sangariya–Rasisar). A bridge that **falls in operation** gets **one month**
+(#19, Kaali Bridge) — from the regulator's *own* expert committee, which found
+the Independent Engineer's failure to run the mandated IRC SP 35 biannual
+survey was a *"gross failure,"* that the collapse *"could have been averted,"*
+and that the pre-event signature, **cantilever-tip droop at the central hinges,
+was visible.**
+
+Same agency. Same year. Same instrument.
+
+> The Indian system knows exactly who to punish for a bridge that breaks while
+> they are building it, and has no idea who to punish for one that breaks after
+> they have finished.
+
+### Reason
+
+**The gap in the audit taxonomy and the gap in the sanction table are the same
+gap**, and a three-phase view is the only structure under which a design
+decision, a construction defect and an operational collapse can be traced to
+one asset and one decision chain. If the taxonomy already existed, this would be
+a feature request. It does not exist, which is what makes it a product.
+
+It is also already conceded, twice, in fragments:
+
+- The **Rajya Sabha Standing Committee (2021)** asked for accountability from DPR
+  drafting through complete execution.
+- **MoRTH's circular of 25 June 2026** did, by circular and without naming it,
+  exactly what this product proposes: made **DPR consultants** mandatorily
+  responsible for existing-asset condition data, made **condition data a
+  precondition of as-built drawing submission and of payment**, and attached a
+  **suspension of monthly payment** to both.
+
+We are not arguing with the ministry. We are naming what it already did.
+
+### Alternatives considered
+
+- **Organise by asset class** — the obvious default, and what every existing
+  BMS does. Rejected: it is the shape of the incumbent, and it cannot express
+  accountability at all.
+- **Organise by function or department** — matches how CAG actually writes.
+  Rejected: it reproduces the boundary that is the problem.
+- **Organise by audit chapter** — maximally defensible, and it stops at
+  execution by construction.
+- **Keep the split but describe it as current practice.** Rejected outright. It
+  is false, it is checkable in an afternoon by anyone with CAG's site, and it
+  would cost the entire interview.
+
+### Trade-offs
+
+- We give up the comfort of "everyone already does this." Every claim needs the
+  taxonomy's absence argued alongside it.
+- The 13/3 figure carries the weight of the argument and is **our
+  recomputation**. It reproduces exactly, and it must always be presented as
+  our tabulation of a parliamentary annexure — never as a government statistic.
+- A Gujarat-only story is weaker: CAG found **₹8.75 cr** of money
+  irregularity across 5 paragraphs in Gujarat R&B for an entire audit period,
+  plus 21.43 ha of forest land diverted without permission. The department is
+  low-value and low-publication. That is strategic, not a weakness — **the
+  accountability layer we are adding does not exist today, in any form, so there
+  is nothing to displace.**
+
+### Future reconsideration trigger
+
+If the sponsor's actual requirement turns out to be a single-phase maintenance
+or inspection tool, the three-phase framing is overhead and must be dropped
+back to provenance-only. If **CAG Gujarat Report No. 2 of 2026** (SFAR
+2024-25, tabled 25 Mar 2026) turns out to contain a lifecycle or O&M chapter
+for R&B, this decision is superseded on the spot — that report has been listed
+but never opened.
+
+---
+
+## D-010 — Contract regime of record is NHAI/MoRTH Standard EPC, explicitly labelled as a substitute
+
+> ## ⚠ AMENDED — see D-011. The GR was opened; the trigger at the foot of this
+> ### decision has fired. Read D-010 and D-011 together. D-010 remains the record
+> ### of what was known and believed *at the time*, and is not to be deleted.
+>
+> **Summary of the change:** Gujarat's own **security deposit (3%, banded)** and
+> **performance bond (3%)** are now established and **override** the NHAI figures.
+> The NHAI substitute survives only for the **escalation weights, milestone
+> schedule, LD rate, Tests on Completion, DLP duration and retention %**.
+
+### Context
+
+D-008's DLP gate needs contract numbers. Gujarat R&B's own works contract
+could not be opened: tenders issue on **SBD/B-1 percentage rate form** under
+**GR TNC-1088-D-347-7-C**, and that document is not retrievable. Gujarat R&B's
+own DLP duration, security percentage and retention terms are therefore
+**NOT ESTABLISHED**.
+
+Every figure in circulation — 5% performance security, 6% retention capped at
+5%, 10-year DLP — is **NHAI/MoRTH Standard EPC**. Using them for Gujarat R&B
+without saying so is the exact failure mode this repository exists to prevent.
+
+### Decision
+
+**Model contract mechanics on NHAI/MoRTH Standard EPC and MoRTH
+Specifications. Label every derived figure, everywhere — schema comments, docs,
+demo narration — as "NHAI/MoRTH; Gujarat NOT ESTABLISHED."**
+
+Precedence where Gujarat-specific fact *is* established:
+
+| Established for Gujarat R&B | Source | Overrides NHAI? |
+|---|---|---|
+| Two-cover (Technical & Price) tender, SBD/B-1 | live NIT | yes — tender structure |
+| EE invites, **SE of the Circle opens** | live NIT | yes — approval chain |
+| EMD = 0.1% of ECPT; tender fee ₹18,000 | live NIT | yes |
+| Tendering via nCode / `tender.nprocure.com`, mirrored on `statetenders.gujarat.gov.in` | live NIT | yes |
+| Contract form B-1 percentage rate | GR TNC-1088-D-347-7-C | yes |
+| DLP duration, security %, retention % | — | **nothing. NHAI used as labelled substitute** |
+
+> **The last row is now superseded by D-011.** Security % and the B-1 ceiling
+> *are* established. **Only the DLP duration and the retention % remain
+> substituted.**
+
+The **three-layer approval chain** is Gujarat-established and is worth keeping
+as a structural fact: **EE invites → SE of the Circle opens → Department
+approves.** CAG Gujarat Rep. 1 of 2026 para 3.8 is the proof that it is three
+layers and not two: a bid-validity miscalculation passed through Division,
+Circle and Department uncaught, producing a ₹72.53 lakh cost overrun on two
+works. The Division's reply was *"an oversight error due to workload."*
+
+### Reason
+
+The alternative is not modelling the DLP at all, and that deletes the **only**
+mechanism connecting construction to post-construction — the seam the entire
+product rests on. A labelled substitute is defensible in an interview. A silent
+substitution is not, and an invented Gujarat number would be worse than both.
+
+### Alternatives considered
+
+- **Leave the DLP unmodelled.** Rejected: removes the seam, and with it the
+  justification for treating construction as a phase at all.
+- **Use CPWD GCC 2023** (5% PS within 7 days of LOI, <80%-of-ECPT treated as
+  abnormally low). Rejected: wrong department, and Gujarat R&B does not use
+  CPWD forms.
+- **Infer Gujarat numbers from NHAI figures and present them as Gujarat.**
+  Rejected — this decision exists specifically to forbid it.
+
+### Trade-offs
+
+An audience that knows Gujarat R&B contracts will recognise the substitution.
+That is acceptable **provided we disclose it first.** Volunteering it converts
+a vulnerability into the strongest available evidence that the rest of the
+research was read rather than assumed.
+
+### Future reconsideration trigger
+
+Any successful opening of **GR TNC-1088-D-347-7-C**, or a sponsor-supplied copy
+of the Gujarat R&B works contract, **immediately replaces this decision** and
+every figure derived under it.
+
+> ### 🔺 TRIGGER FIRED. GR TNC-1088-D-347-7-C was recovered in full, verbatim, by
+> ### OCR from the official scan on 11-07-2017. See D-011 for the replacement
+> ### decision and the amended precedence table.
+
+---
+
+## D-011 — Gujarat's own contract terms now override NHAI where established; the substitute narrows, it does not vanish
+
+### Context
+
+D-010 recorded that **GR TNC-1088-D-347-7-C could not be opened** and that Gujarat
+R&B's DLP, security and retention terms were therefore `NOT ESTABLISHED`, with
+NHAI/MoRTH Standard EPC substituted. Its reconsideration trigger has fired.
+
+The departmental site `rnb.gujarat.gov.in` was reached directly. **Every resolution
+on it is an image-only scan**; operative text was recovered by rendering at
+300–450 dpi and OCR'ing. The four-resolution B-1 chain was recovered, the 2017
+link of it in English and cleanly.
+
+> **Method caveat, carried forward everywhere:** "recovered by OCR from the
+> official scan" is **not** "verified against a certified copy." Gujarati
+> instruments were **not** recoverable — no Gujarati OCR model was available —
+> so those are reported as *letter located, operative text not recovered*.
+
+### Decision
+
+**Gujarat-established figures now override NHAI. The NHAI substitute survives only
+where Gujarat remains unestablished. Both tracks are labelled, per figure, in
+schema comments, docs and demo narration.**
+
+**The amended precedence table — this supersedes D-010's table:**
+
+| Contract term | Gujarat R&B value | Source | Status |
+|---|---|---|---|
+| Tender form | **B-1 percentage rate**; **B-2 item rate** | GR TNC-1088-D-347-7-C chain | **[V] established** |
+| **B-1 monetary ceiling** | **₹12.00 cr road · ₹10.00 cr bridge & building**, "invariably on B-1 tender form only" | **GR TNC-1088-D-347-(7)-C dt 11-07-2017**, verbatim; Finance Dept concurrence 27-06-2017; signed N.G. Parmar, OSD (S.P) | **[V] established** |
+| **Security deposit** | **2%** ≤₹2L · **2%** ₹2–5L · **3% ≥₹5L (2-yr BG)** · **5%** hydraulic/bund (5-yr BG). Penalty = the deposit then payable | **GR TNC-10-2013-3-(BHAG-2)-C dt 20-11-2013**, table recovered verbatim | **[V] established.** A bridge estimate is essentially always >₹5L, so **3%** is the operative case |
+| **Performance bond** | **3%** of total contract amount | **GR PRC-10-2020-329-C dt 01-06-2021** — figure appears in title, subject and body | **[V] established** |
+| **DLP location** | **SBD clause 33, "Identifying Defects / Defect liability period"** | **CIRCULAR C dt 11-12-2025**, file `RBD/OAS/e-file/16/2022/0002/Section C`; refs GR 30-04-2020 and 19-08-2024; બ્રિજ in scope | **[V] established** |
+| **DLP duration** | — | SBD not published | **`NOT ESTABLISHED` → NHAI substitute (10 yr) stands, labelled** |
+| **FMGP location** | **SBD sub-clause 17(B)(3)**, road work only | GR TNC-10-2013-3-BHAG-3-C dt 13-12-2013 | **[V] established** |
+| **Retention %** | — | lives inside the unpublished B-1/SBD | **`NOT ESTABLISHED` → NHAI substitute stands, labelled** |
+| Escalation weights, milestone schedule, LD rate, Tests on Completion | — | NHAI EPC / MoRTH specs | **`NOT ESTABLISHED` → NHAI substitute, labelled** |
+| 120-day tender acceptance | GPWM cl. 212-A + GR 10-05-2013 | GR TNC-10-2013-02-C | **[V] established — and double-grounded, since CAG cites the same resolution** |
+| **Price variation** | clauses 59/59A (B-2), 60/60A (B-1) | GR TNC-1089-4-C dt 21-10-2005; GR 24-03-2022 COVID relief | **[V] established — see D-013** |
+
+> ### ⚠ The single most important correction in this decision:
+> ### **Gujarat's security deposit is 3% and its performance bond is 3%.**
+> ### NHAI's figures are 5% and 6%. **Using NHAI's numbers for a Gujarat bridge
+> ### was wrong, and had it shipped, a Gujarat engineer would have known in
+> ### one question.** This is precisely the failure D-010 was written to
+> ### prevent, and it is the argument for the discipline.
+
+### Reason
+
+Two of the three contract figures that mattered most are now the department's
+own, recovered verbatim from the operative instrument. The substitution was
+correct as a method and wrong as an outcome — which is the correct outcome for
+a method, since it is falsifiable and was falsified. What remains substituted is
+narrow, specific and enumerable, and is labelled everywhere it appears.
+
+### Alternatives considered
+
+- **Retire the NHAI substitute entirely now that the B-1 chain is open.**
+  Rejected: the chain touched **only the monetary ceiling**. The DLP duration,
+  the retention % and the clause percentages live inside the unpublished SBD
+  and B-1 form. Retiring the substitute would mean *inventing* Gujarat numbers —
+  strictly worse than a labelled borrow.
+- **Treat the OCR'd figures as certified.** Rejected. Image-only scans OCR'd at
+  300–450 dpi are good evidence, not certified copies, and the record must say so.
+- **Assume the NHAI retention of 6%-capped-at-5% carries over.** Rejected —
+  §4A.3 shows Gujarat runs a **banded** security regime, so its retention rules
+  may well differ. **Do not assume.**
+
+### Trade-offs
+
+The schema now carries **two labelled provenance tracks** rather than one. That
+is more work and it is worth it: a single figure now always answers *"whose
+number is this, and why?"*
+
+### Future reconsideration trigger
+
+A **photocopy or PDF of Tender Form B-1 / B-2, or the Standard Bidding Document**
+— physically issued to every tendering contractor, and the single document that
+closes the largest remaining gap. **Second trigger:** a readable copy of
+**GR SSR-10-2017-50-C**, the GST clause-amendment tables, whose OCR failed at
+every setting and which is the likeliest published home of the clause
+percentages.
+
+---
+
+## D-012 — The frame we present is Gujarat's own `Sanction → Execution → Post-Completion`, not the American triad
+
+### Context
+
+D-009 established that the pre-/construction/post-construction split is **not** a
+recognised Indian taxonomy and must never be described as current practice. That
+left the product defending an imported vocabulary against an audience that uses
+a different one.
+
+A second, independent search has now run against Gujarat's own records: the
+**full text** of the Gujarat SFAR 2024-25 (739 KB), **CAG Report No. 1 of 2026**
+including its entire R&B chapter (701 KB), a CAG AAG report, **CAG G2012
+chapters 2 and 3 (PWD)**, and the Karnataka PWD and Roads chapters.
+
+> **Zero hits. In the department's own audit record, its own audit manual, and
+> the national PWD audit guidance.**
+
+One real qualification: **Karnataka's PWD/Roads chapter does contain a formal
+"Defect Liability Period" concept.** The *vocabulary* exists in Indian practice.
+The *phase split* does not. The only confirmed user of the exact triad anywhere
+is **US FHWA Road Safety Audit guidelines** — **not Indian precedent.**
+
+### Decision
+
+**Adopt `Sanction & Clearance` → `Execution` → `Post-Completion` as the frame we
+present, anchored to the budget's own 051/053 minor-head split, and hang our
+three stages inside it. Never present the American triad as Indian practice.**
+
+CAG does not audit by lifecycle phase. It audits by: (i) **sanction-to-order
+timeliness** (the 120-day rule), (ii) **completion** (the ≥₹10 cr cohort),
+(iii) **cost control** (PV, EPC bonus, avoidable over-widening), (iv)
+**environmental compliance**, (v) **asset and fund accounting**. That is a
+five-part audit frame our three stages map onto cleanly.
+
+Gujarat's own budget already splits the lifecycle into **051 Construction** and
+**053 Maintenance & Repairs**, and there is **no budget line for a
+pre-construction phase** — it is capitalised inside 051.
+
+### Reason
+
+This is strictly stronger than defending the triad. It is a *refinement* of a
+split the department already uses in its accounts rather than an import, and it
+converts a liability into an asset: the same evidence that would have
+falsified us now makes us look like we'd read the accounts.
+
+The **051 finding is the sharpest version of the argument in the entire
+research base**: the department's own accounting **cannot separate the phase our
+product exists to manage.** Pre-construction cost is obtainable only from the
+Administrative Approval and its sub-estimates, never from the accounts. That is
+not a gap in the data — it is a gap in the *category*.
+
+### Alternatives considered
+
+- **Continue presenting the triad, with a footnote.** Rejected: the footnote
+  does the apologising and the interviewer does the remembering.
+- **Use CAG's five-part audit frame as our product frame.** Rejected: it is an
+  auditor's frame, not a lifecycle, and "cost control" is not a phase.
+- **Drop the phase split and ship a single works register.** Rejected: this
+  deletes the seam the entire product rests on (D-008, D-009).
+
+### Trade-offs
+
+A reviewer who knows the American literature may find our labels
+unfamiliar. Mitigation: the labels are Gujarat's, and we can show the 051/053
+mapping. The framing also **narrows our claim**, which makes it easier to
+defend — a smaller true claim beats a larger borrowed one.
+
+### Future reconsideration trigger
+
+Any CAG or MoRTH document defining a formal three-phase lifecycle taxonomy.
+**Note that MoRTH's circular of 25 Jun 2026 already builds the phase seam by
+circular and attaches a payment sanction to it** — if it acquires the word
+"phase", this decision must be revisited.
+
+---
+
+## D-013 — The price-variation engine is the primary demonstration, because CAG asked the department to build it
+
+### Context
+
+CAG Report No. 1 of 2026 found that **Gujarat R&B has no works accounting and
+management system**, and recommended the Department build one, integrated with
+IFMS, with an automated PV Calculation Module pre-loaded with correct indices,
+ceilings and data-range logic — naming **Odisha's WAMIS** as good practice.
+
+Corroborating findings in the same report set: a **statutory** asset register
+does not exist as a database, only the Gujarat Highways Act 1955 **s.8** paper
+map in the Highway Authority office; the 2008 monthly-monitoring `.xls` files
+**404**; and **₹71.07 cr of ₹71.96 cr (98.76%)** of Roads and Bridges receipts
+under MH 1054 were **wrongly booked under MH 800 (Stock)**.
+
+Gujarat's own PV rules are recovered verbatim and fully computable: admissible
+only where **estimated cost > ₹25 lakh and time limit > 12 months**; **no PV in
+the first 12 months**; **ceiling 5% of estimated cost less the value of Cement,
+Steel and Asphalt**; escalation **`1.1^n`**; EPC variant **WPI/CPI + IOCL HSD +
+refinery bitumen, Base Date = bid due date − 28 days**, claimed against the
+Interim Payment Certificate.
+
+And the department demonstrably gets it wrong: **₹4.74 cr overpaid across 11
+works in 5 divisions** (Bharuch, Godhra, Kheda-Nadiad, Palanpur, Surat). The
+Bharuch case interchanged the **Cement (122.5)** and **Steel (108.4)** index
+bases — instead of recovering ₹15.57 lakh the Division **paid ₹40.13 lakh**, a
+**₹55.70 lakh** arithmetic inversion in one cell of a formula. NH Division
+Gandhidham paid **₹7.35 cr PV with ₹78.30 lakh excess**.
+
+### Decision
+
+**Build the price-variation engine first. Lead the demonstration with it. It is
+the feature an auditor has already recommended in writing, against a failure
+CAG has already quantified.**
+
+Two supporting engines follow, both computable from rules rather than recovered
+from a dead system, so neither carries legacy-data risk:
+
+- **The Schedule-G dispute clock** — three stages, 7/7/7/9 = **30 days**,
+  14/14/14/18 = **60**, 30/14/14/32 = **90**, escalating into the Legal arm.
+  **Approved by the Chief Secretary on 17-01-2026.** Needs no data at all.
+- **The QC/ATR engine** — **`S` / `SRI` / `U`** → ATR at **2 / 3 / 6 / 12
+  months** → escalation → **Reconstruction** → **Red Card** to the contractor.
+  Gujarat's own, verbatim (GR PRC-10-2017-31-C dt 26-05-2017, 28 standard forms).
+
+### Reason
+
+No demo beat in this project is better matched to a documented recommendation
+from the auditor who audits the client. We are not asserting a gap; we are
+filling one that was written down, and we can price the failure we prevent.
+
+The Schedule-G clock and the QC/ATR engine earn their place for a different
+reason: **both are computable from published rules, so neither depends on data
+we do not have.** In a hackathon with no access to a client's systems, that is
+worth more than feature breadth.
+
+### Alternatives considered
+
+- **Lead with the three-phase narrative.** Rejected as the *lead*: it is
+  abstract, and the interviewer will ask what we actually built.
+- **Lead with the register that lies.** Retained, demoted: it is the best
+  *problem* slide but the fix is data entry, not a product.
+- **Lead with the Karwar refusal.** Retained — it requires zero domain
+  knowledge and lands in ten seconds, which makes it the right *opener*.
+
+### Trade-offs
+
+The PV engine is the most technically demanding item in the plan. If the clock
+runs short it is the correct thing to cut, because it carries the most
+implementation risk. But **cutting it first and keeping the narrative would
+cost us the strongest single asset we have**, so the sequencing is: opener =
+Karwar, lead = PV, problem slide = the register.
+
+### Future reconsideration trigger
+
+Publication of a Gujarat R&B works accounting or PV module. If one ships, our
+contribution narrows to the per-asset layer CAG also found missing, and the
+framing must change from *build the module* to *the register the module has
+nothing to read*.
+
+---
+
+## D-014 — The actor model is nine wings and a real post chain, not three roles
+
+### Context
+
+D-009 and the earlier actor work assumed a small, readable set of roles. Gujarat
+R&B publishes its organisation, and the published structure does not support a
+three-wing model.
+
+**Nine CE&AS-level wings**, each headed by a **Chief Engineer & Additional
+Secretary** — one officer holding an engineering post in Additional Secretary
+capacity. Plus **Expressway** and **SHDP-PIU**, revealed by the 2022
+distribution list and **absent from the CE roster**.
+
+**Published sanctioned posts:** CE 14 · SE(Civil) 35 · EE(Civil) 167 ·
+EE(Elec) 15 · DyEE(Civil) 587 · DyEE(Elec) 40 · AE(Civil) 839 · AE(Elec) 53 ·
+AAE(Civil) 538 · AAE(Elec) 48 · **Class III 6,709**.
+
+**Non-technical actors that real resolutions name, and which are therefore real:**
+**Divisional Accountant** (required member of evaluation **Committee A**),
+**Financial Advisor** (required member of **Committee B**, **appointed by the
+Finance Department**), Sectional Officer, Legal Executive, Additional Secretary
+(Budget), Chief Secretary.
+
+### Decision
+
+**Model `person` separately from `post`; model `org_unit` as a tree with a dated
+parent; model the real post chain; and treat non-technical actors as
+first-class.**
+
+Specific commitments, each earned from a source rather than invented:
+
+- **CE&AS is one person holding two capacities.** The dual charge is real and
+  published. Do not model it as two people.
+- **`unit_kind` must separate works-administration circles from
+  contractor-registration circles.** The 7 circles on the Contractor List page are
+  evidenced as *registration* circles, because the 8,113-contractor register is
+  partitioned by them. **Which registration circle maps to which CE is `NOT
+  ESTABLISHED`. Do not collapse the two.**
+- **`committee_member` is a dated association** with `from_date`/`to_date`, not
+  a static array. GR dt 17-10-2022 substitutes *"any other Chief Engineer
+  available in the Headquarter"* when the chair is unavailable — the committee is
+  **bench-based** and resilient to absence.
+- **A contractor's class is a dated history, not an attribute.** *Demotion to
+  lower class* is an enforceable sanction (GR 13-02-1976).
+- **A bridge's canonical name is human-authored and once-finalised, not
+  auto-derived**, with a `naming_finalised_on` date. This is a real requirement
+  extracted from a circular about **nameplate spelling** (PWM-2105-MP-219-(3)-C
+  dt 17-10-1985, finalise within 15 days) — trivial on its face, and a genuine
+  schema consequence.
+- **≈9,045 total staff is our arithmetic** from the published post table, not a
+  published figure. **No published rows exist for Civil Engineer, Supervisor,
+  Draughtsman, Chainman, Mate or Labourer** — they sit inside the Class III
+  6,709 bucket. **Flag, do not fill.**
+
+### Reason
+
+A three-wing actor model would not survive contact with a Gujarat division. And
+the second-person verification gate — the thing the entire product thesis rests
+on — only means something if the posts that perform it actually exist. **They do**,
+and they are numerous, and several of them are non-technical.
+
+**Financial Advisor and Divisional Accountant being mandatory committee members
+is the single most useful fact here.** It proves the department does not confine
+approval to engineers, which is what makes an independent-verification gate
+institutionally plausible rather than invented.
+
+### Alternatives considered
+
+- **Model the three wings the sponsor's brief implied.** Rejected: contradicted
+  by the department's own published hierarchy.
+- **Flatten posts to a single `role` string.** Rejected: destroys the dated
+  history that demotion and bench-based committees both require.
+- **Infer the Class III sub-roles.** Rejected: not published. Filling them is
+  exactly the confident invention this repository forbids.
+
+### Trade-offs
+
+Nine wings, eleven posts and a dual-charge convention is more schema than a
+three-wing model. Accepted: an interviewer from the department will check the
+org chart, and a model that survives that check is worth the extra entities.
+
+**A `UNKNOWN_CE` placeholder is required for Expressway and SHDP-PIU.** Showing
+a gap honestly is better than omitting the wings.
+
+### Future reconsideration trigger
+
+A readable copy of **GR PDW-3079-D-2959-BHAG-1-136-C** (Delegation of Powers to
+Technical Officers, 17-04-2002, extended annually) — the Gujarati operative text
+did not OCR, and it is **the authority table for the approval model.** Until
+then, every `approval_matrix` row carries an explicit *"limit unknown — pending
+GR text"* marker, and **no monetary threshold is invented.**
+
+---
+
+## D-015 — Schema traps we will not walk into
+
+### Context
+
+The Gujarat pass recovered enough of the department's real vocabulary to make
+several confident-sounding schema choices *wrong*. Each of these is a plausible
+detail that a Gujarat engineer would catch immediately, and each was a live
+risk before the instruments were read.
+
+### Decision
+
+**The following are excluded or constrained, with reasons recorded so no later
+agent reinvents them:**
+
+| Item | Ruling | Why |
+|---|---|---|
+| **`eMD`** | **EXCLUDE** | **MGNREGA / Shram Sudhi vocabulary, not R&B.** Gujarat R&B says **EMD** — GR SSR/10/2015/17/C uses "EMD forfeited". An *electronic* MGNREGA-style eMD is not an R&B concept |
+| **`challan`** | **EXCLUDE** | A tax/receipt instrument, not tender vocabulary. **R&B contractor receipts run through e-payment** (GR SSR-102017-57-C dt 30-04-2018, RTGS/NEFT) |
+| **Measurement book, cash book, muster roll, stock register, works register, estimate register, correspondence register** | **MODEL, but label** | Canonical PWD/GPWM office procedure across essentially every Indian state, and CAG itself cites GPWM in its Gujarat findings. **Right to model; wrong to attribute to Gujarat R&B.** Mark each *"modelled from standard GPWM practice, not from a published Gujarat R&B source"* |
+| **"TRA"** | **CLARIFY before building** | Ambiguous. If **ATR** (Action Taken Report, GR PRC-10-2017-31-C) is meant, it is real and established. Anything else must be confirmed |
+| **Arrear register** | **DO NOT MODEL** | `NOT ESTABLISHED` for Gujarat R&B. Standard public-works concept, but no instrument found |
+| **A "Technical Note Committee" as a standing approving forum** | **DO NOT MODEL** | Subject search returns **zero hits**. The file-number prefixes `TNC-`, `PWM-`, `PRC-`, `SSR-`, `RGN-`, `RBD-`, `BKL-`, `LAB-`, `LCS-`, `DCB/CON-`, `B&L-` are **at least eleven distinct internal section codes**, so `TNC-` reads as a **file namespace, not a committee**. **This is an inference from file-number structure, not a sourced fact — record it as unconfirmed in both directions.** What *is* established as a per-work approving forum is the **evaluation committee** (A/B) and the **Administrative Approval** chain |
+| **A standalone R&B "Rules of Business" or "Manual of Instructions"** | **DO NOT CITE** | **Both NOT FOUND.** The functional equivalents are the **Gujarat Public Works Manual**, **GPWM**, and the **General Rules and Instructions for Guidance of Contractors** (B-2), whose **Suggestion No. 18** is real but whose content did not OCR |
+| **The department Budget page total (₹29,709.62 lakh / ₹296.97 cr for 2026-27)** | **NEVER as the department budget** | It is an office/sub-head-level schematic and is **~2 orders of magnitude below** CAG's MH 5054 capital outlay of ₹16,513.22 cr. **Putting the two in one slide is the easiest way to lose the room.** Use the Budget page for the *head and scheme-code taxonomy*; use CAG for *magnitudes* |
+| **CAG report URLs** | **CITE BY NUMBER AND TITLE ONLY** | All plausible CAG Gujarat URLs **return 404**. An interviewer will click a fabricated link |
+
+### Reason
+
+Each ruling is a case where a plausible invention would have been *defensible to
+us and wrong in fact*. The register exists so the next agent inherits the
+reasoning, not just the conclusion — and so a rejected option is not silently
+retried.
+
+### Trade-offs
+
+Some exclusions leave the model thinner than a general-practice reading would.
+Accepted. **A gap labelled is defensible; a plausible invention discovered in the
+room is terminal.**
+
+### Future reconsideration trigger
+
+A readable copy of the **Gujarat Public Works Manual** (557 pp + 735 pp
+annexures) or the **B-1/B-2 tender forms**. One unexplored lead worth a single
+request: **`/Pages/Contents/ACT`** on the departmental site, which may carry
+departmental rules the search did not surface.
+
+---
+
+## D-016 — The register is the product, and no query may hide an asset
+
+- **Status:** accepted
+- **Date:** 2026-09-28
+- **Trigger:** operator report that adding a new bridge made the previous one
+  disappear from the workspace.
+
+### Context
+
+The MVP demonstrated a lifecycle by holding exactly one asset in view. The
+operator's complaint was that creating a bridge appeared to remove the old one.
+
+**The backend was never at fault.** A direct probe created two assets against a
+seeded register of four and returned six, with every original code intact. The
+defect was entirely in presentation, and it was a *design* defect rather than a
+cosmetic one, for three reasons.
+
+1. **The register was behind a navigation click.** The portfolio list lived on
+   its own page, while every workflow page rendered a single selected asset. An
+   operator working inside a lifecycle had no evidence that any other asset
+   existed. Absence of evidence was being read as absence of the asset.
+2. **The query silently truncated.** `list_assets` applied
+   `.limit(min(limit, 100))` with a default of 50 and returned no total. Past
+   fifty assets a bridge would vanish from the register with nothing in the
+   response to indicate it. This is not a demo-only concern: the department's
+   own Achievements page publishes **7,185** bridges, so that threshold sits at
+   well under one percent of the real register.
+3. **The seed created one bridge.** A lifecycle-management product whose
+   register holds a single asset cannot demonstrate the thing it exists to
+   manage, and a judge sees that in one glance.
+
+### Decision
+
+**a. The register is permanently visible.** An `AssetRail` renders every asset
+on every authenticated page, grouped by lifecycle phase, with search. It is not
+a navigation destination. Selection changes the asset under inspection and
+nothing else; the surrounding register never unmounts.
+
+**b. No endpoint may hide an asset silently.** `list_assets` now returns
+`items`, `total` (post-filter), `returned`, `truncated`, and `register_total`.
+Filtering and search run server-side against the whole register, so a search
+term reaches assets beyond any page boundary. The client renders an explicit
+warning when `truncated` is true rather than presenting a short list as though
+it were complete.
+
+**c. The seed is a nine-asset portfolio across the three phases.** Three
+bridges each in Sanction & Clearance, Execution, and Post-Completion, with
+varied service states: one `RESTRICTED`, one `SRI` carrying an open defect and
+an approved work order, one clean `S` post-completion bridge, three blocked
+gates, and two active contracts carrying different downstream layers
+(milestones plus an evaluated quality test; a price-variation claim under
+finance review).
+
+**d. The seed is additive and idempotent per asset code.** It checks existence
+by `asset_code` and creates only what is missing. It never deletes or rewrites
+an existing row. Re-running it after an operator has created bridges leaves
+those bridges untouched — verified directly, not assumed.
+
+### Reason
+
+An asset register whose contents can change without the operator being told is
+not a register. This is the same failure the research record identifies in the
+domain: CAG found Gujarat's receipts and asset records booked and maintained in
+ways the department could not itself reconcile, and the department publishes
+**three mutually inconsistent official bridge counts** (1,441 / 6,768 / 7,185).
+A product arguing that the missing artefact is *a trustworthy register* cannot
+ship a register that quietly drops rows.
+
+The decision is also cheaper than the alternative. Making the register permanent
+required no schema change and no new endpoint, because the data was already
+correct; only its presentation was wrong.
+
+### Alternatives considered
+
+- **Paginate the register into a dedicated page.** Rejected: it reproduces the
+  original defect, because the register is again absent from the workflow
+  screen. Pagination stays a legitimate future addition once the register
+  genuinely exceeds a few hundred assets, and the response shape added here
+  (`total`, `truncated`) already supports it.
+- **Show only the most recent N assets.** Rejected outright. A recency-ordered
+  list makes a stable asset appear to vanish when a newer one is added, which is
+  precisely the reported symptom.
+- **Deduplicate by bridge name.** Rejected. Identity is the asset code, not the
+  name. D-014 already settled that the canonical name is human-authored with a
+  `naming_finalised_on` date, so two distinct bridges may legitimately share a
+  name, and the register must show both.
+- **Reset the database on seed.** Rejected: it would discard operator-created
+  data, which is the same class of silent loss the change exists to prevent.
+
+### Trade-offs
+
+The rail consumes horizontal space, so the workspace grid widened from 1240px to
+1500px and collapses to one column below 900px. A register growing to thousands
+of assets will need windowing inside the rail; the `truncated` flag already
+reports honestly in the meantime, and the API accepts a `limit` up to 2000.
+
+Seeding nine bridges instead of one made the seed considerably longer and
+required a dedicated 100-id block per asset, because the original single-asset
+id arithmetic silently overlapped between assets and violated a primary key on
+`clearance_records.id`. The block discipline is the cost.
+
+### Future reconsideration trigger
+
+A real register import. Once genuine Gujarat bridge data replaces the synthetic
+portfolio, phase grouping in the rail should be driven by the department's own
+recorded lifecycle state rather than a hardcoded constant, and the rail should
+gain district and class filters. The `PHASES` constant in
+`apps/web/src/app/workspace/page.tsx` is the single place that assumption lives.
+
+---
+
+## D-017 — Deployment configuration is read from the environment, never hardcoded
+
+- **Status:** accepted
+- **Date:** 2026-09-28
+- **Trigger:** a failed Render deployment, followed by the discovery that the
+  CORS allowlist and the deploy trigger were both hardcoded to values correct
+  only for one specific deployment.
+
+### Context
+
+Three configuration faults, all of the same kind: a value that must change per
+environment was frozen into the code or the manifest.
+
+1. **CORS allowlist.** `main.py` hardcoded exactly two origins, one being a
+   specific Vercel hostname. Any other deployment hostname would pass health
+   checks and then fail every browser request, which reads as "the backend is
+   down" during a demo.
+2. **`autoDeployTrigger: checksPass`.** Render would deploy only once its health
+   check passed, but the check could not pass until the service was running.
+   This deadlocks the first deploy of a new service.
+3. **Silent JWT fallback.** `security.py` fell back to a publicly known signing
+   key when `JWT_SECRET` was unset, with no signal at any level. A deployment
+   missing its secret would issue validly signed tokens under a key that is
+   present in the repository.
+
+### Decision
+
+- CORS origins come from `CORS_ORIGINS`, a comma-separated environment
+  variable. The two known-good origins remain as the default so local work is
+  unaffected, and the default is now explicitly a fallback rather than the
+  configuration.
+- `autoDeployTrigger` is `commit`, with `autoDeploy: true`.
+- `render.yaml` declares `DATABASE_URL`, `JWT_SECRET` and `CORS_ORIGINS` as
+  `envVars`, so a missing secret is visible in the Render dashboard rather than
+  inferred from a failure.
+- The JWT fallback is retained for the local seeded demo, but emits a `WARNING`
+  naming the risk at import time. Verified in both directions: with
+  `JWT_SECRET` set the fallback is not used, and without it the warning fires.
+- `.env.example` documents all four variables, marks which are mandatory on a
+  deployed instance, and states the `postgresql://` to `postgresql+psycopg://`
+  rewrite so a working connection string is not misdiagnosed as broken.
+
+### Reason
+
+A configuration fault that only manifests after deployment, and only in a
+browser, is the most expensive class of bug available during a live demo. Every
+value in this list is per-environment by definition, so none belongs in source.
+
+The JWT fallback was deliberately **not** converted into a hard startup failure.
+That would be the stricter engineering choice and is the right one for a system
+handling real credentials. Here it would trade a security nicety for a demo that
+cannot start on a forgotten environment variable. The compromise chosen keeps
+the demo alive and makes the risk unmissable in the logs, which is the honest
+version of that trade.
+
+### Alternatives considered
+
+- **Refuse to start without `JWT_SECRET` when not on localhost.** Rejected for
+  now, for the reason above. Revisit the moment real user credentials exist.
+- **Allow all origins.** Rejected outright. It would have hidden this fault
+  rather than fixed it.
+
+### Trade-offs
+
+The CORS default is still a guess about the current deployment. Setting
+`CORS_ORIGINS` remains a required deployment step, now documented in three
+places: `render.yaml`, `.env.example`, and the `_cors_origins` docstring.
+
+### Future reconsideration trigger
+
+Real authentication. When genuine accounts exist, the JWT fallback must become a
+startup failure, `TOKEN_TTL_HOURS` should move to configuration, and refresh
+tokens should replace the single 8-hour access token.
+
+---
+
+## D-018 - Phase is derived from records, never read from a stored label
+
+**Context.** `Asset.lifecycle_state` was a hand-maintained column. The audit
+against `research_3phase_opencode.md` found the reported failure: a not-yet-built
+bridge could be shown in Post-Completion, because "Post-Completion" was a value
+someone typed rather than a fact the system could check. The seeded portfolio
+was hand-tuned to a tidy 3/3/3 split across the three phases.
+
+**Decision.** `Asset.lifecycle_state` remains as a convenience column, but the
+authoritative phase is computed by `app/lifecycle.py:phase_facts` from two
+recorded facts: whether a contract has been awarded, and whether it is
+completed. `phase_facts` answers for a whole list of assets in three queries
+rather than N. The passport reports `stored_state_agrees` so a divergence
+between the two is visible rather than silent.
+
+**Reason.** "Post-construction applies only to a constructed bridge" is now a
+structural property of the system rather than a promise in a document. A bridge
+cannot be teleported between phases by writing a column, because no code path
+reads the column to decide anything.
+
+A *published but unawarded* tender derives to Sanction & Clearance, not
+Execution. This is correct: you cannot be under construction without somebody
+being bound to build you. It reclassified the seeded Alok bridge and produced a
+derived split of 5 pre / 2 execution / 3 post rather than the hand-set 3/3/3.
+
+**Alternatives considered.** Keeping the column as the source of truth and
+validating it — rejected, because validation can be skipped and does not prevent
+a bad write. Deriving phase on the client — rejected for the same reason
+`lifecycle_state` was unsafe: a presentation-layer derivation is not a fact.
+
+**Trade-offs.** A stale column can disagree with the derived value, which is why
+`stored_state_agrees` is surfaced. The hand-set seed values no longer need to be
+maintained, which removes a whole class of demo breakage.
+
+**Future reconsideration trigger.** If the department adopts a formal lifecycle
+state machine with named transitions, the column becomes a cache of a real
+state machine and can be trusted again. Until then it is a label.
+
+---
+
+## D-019 - Visibility is applied in SQL from the caller's role, before any row is read
+
+**Context.** Every authenticated user saw every bridge. Role differences were
+cosmetic: the frontend rendered different panels for different roles, but the
+API returned the same data. A contractor could read another company's contract
+terms and award amount.
+
+**Decision.** A single function, `lifecycle.scope_asset_query`, applies
+`Asset.id.in_(allowed)` inside the query. Three role groups:
+
+- `SEE_ALL_ROLES` — State Admin, Chief Engineer, Superintending Engineer,
+  Executive Engineer, Auditor.
+- `BUILT_ONLY_ROLES` — Inspector, Quality Engineer, Finance. These see only
+  awarded bridges, because their work acts on a physical structure.
+- `CONTRACTOR_ROLES` — Contractor, and only what binds them.
+
+An empty allow-set is compiled to `Asset.id.is_(None)`, so a role that can see
+nothing receives nothing rather than everything.
+
+A contractor is refused a bridge outside scope with **403 naming the rule that
+produced it**, not a hiding 404. A 404 would make an authorization boundary
+indistinguishable from a missing record.
+
+**The contractor clause was corrected after the bid button proved unreachable.**
+The first version scoped contractors to bridges where their company *already*
+held a contract. That made a published tender they had not yet won invisible,
+so "Submit controlled bid" could never render. A tender notice is public by
+design — nProcure publishes it. A contractor now sees three things: a tender
+open for bidding, a bridge they are bound to build, and a defect they have been
+told to repair. Competing bids are shown to exist; their prices are not.
+
+**Alternatives considered.** Filtering in the frontend — rejected, it is the
+thing that was already broken. A permission table joining users to assets —
+rejected as premature; the three role groups are derivable from what a role
+does, and a join table would be a second source of truth for a decision that
+lives in one function today.
+
+**Trade-offs.** A role change is a code change, not a configuration change. That
+is a real cost, and acceptable while the actor model is still being confirmed
+with the sponsor. It also means the rules must be defensible, because they are
+visible in a diff.
+
+**Future reconsideration trigger.** Real accounts, or a sponsor decision to
+delegate visibility to a division rather than a role. Either makes a persistent
+grant table the right answer.
+
+---
+
+## D-020 - Every error cites the record that justifies it
+
+**Context.** Refusals were bare `HTTPException`s. "403 Forbidden" and
+"GATE_NOT_PASSED" tell a demonstrator nothing and cannot be defended in an
+interview. Worse, nothing stopped a plausible-but-wrong rule from being written
+into a message and shipped — the audit found two different invented quality rules
+that contradicted each other, one in the API and one in the seed.
+
+**Decision.** `app/errors.py` defines `DomainError(HTTPException)` carrying
+`code`, `message`, `detail`, `remediation: list[str]`, and `reference`. Helpers:
+`gate_blocked`, `role_denied`, `not_visible`, `wrong_phase`, `rule_violation`,
+`not_established`, `conflict`, `invalid`, `missing`. Registered once in
+`main.py` so every route inherits it, including routes added later.
+
+`reference` names a section of `research_3phase_opencode.md`. Where the record
+says `NOT ESTABLISHED`, `errors.not_established` returns **501**, not an
+invented value.
+
+**Reason.** A citation in the error is what makes the refusal a fact rather than
+an assertion. It also means the research record and the running system cannot
+silently drift apart: a rule with no source cannot produce a message.
+
+**Alternatives considered.** Logging the basis server-side and showing a short
+message — rejected, the audience for the basis is the person being refused and
+the interviewer. Bare HTTPExceptions — rejected, that is the status quo this
+replaces.
+
+**Trade-offs.** Error bodies are larger. The frontend renders all five fields
+deliberately; a bare message would have been less work and would have thrown
+away the point.
+
+**Future reconsideration trigger.** An i18n layer. `reference` and `remediation`
+are currently English prose and would need to move to message catalogues, while
+`code` stays stable as the machine-readable key.
+
+---
+
+## D-021 - The price-variation engine computes server-side or it does not exist
+
+**Context.** `PVClaimInput` accepted both `submitted_amount` and
+`calculated_amount`, computed their difference, and stored it. That is a
+difference calculator, not an engine — and it left the arithmetic with the
+people who got it wrong last time.
+
+**Decision.** The input carries only measured facts: `components[]` with
+`portion`, `base_index`, `current_index`; plus `months_elapsed` and `is_bridge`.
+`claimed_amount` is optional and used **only** to report the variance the engine
+found, never to compute the entitlement.
+
+Index-base mismatch is **fatal**. On mismatch `computed` is forced to `0.00` and
+no payable figure is produced at all, with `arithmetic_sum_before_checks` and
+`index_integrity_verified` retained for audit.
+
+**Reason.** The Bharuch failure was Cement (122.5) and Steel (108.4)
+interchanged in one cell: a ₹15.57 lakh recovery became a ₹40.13 lakh payment, a
+₹55.70 lakh inversion. The wrong answer was entirely plausible. An index-base
+mismatch does not produce a wrong number, it produces a convincing one, so an
+advisory warning would have been worse than useless — it would have let the
+figure through with a note attached.
+
+The full rule set is computable from Gujarat's own documents: admissible only if
+EC > ₹25 lakh **and** time limit > 12 months; no price variation in the first 12
+months; ceiling 5% of EC less Cement/Steel/Asphalt; escalation `1.1^n`; EPC base
+date = bid due date − 28 days.
+
+**Counter-intuitive detail that must survive.** For **Major Bridges, Cement and
+Steel carry zero weight** — Labour 20%, Bitumen 15%, Fuel 10%, Other materials
+40%, Plant 15%. Assuming they carry weight, as they do for roads, silently
+inflates every Major Bridge claim.
+
+**Alternatives considered.** Recompute on the client and compare — rejected, the
+server must be the only place an entitlement is produced. Warn and let the
+claimant proceed — rejected for the reason above.
+
+**Trade-offs.** A legitimate claim with a genuinely revised base cannot proceed
+without a route to record the new base. That is intentional: the route should be
+an amendment with an audit trail, not an override.
+
+**Future reconsideration trigger.** A department-issued base-date amendment
+table. Today the base indices are constants in `rules.OFFICIAL_BASE_INDICES`,
+which is honest but not maintainable.
+
+---
+
+## D-022 - Refusals are recorded, not discarded
+
+**Context.** A refused price-variation claim and a failed quality test were
+returned as 4xx and dropped. The client saw an error; the department kept no
+record that anyone had tried.
+
+**Decision.** Both are persisted with their reasons before the 4xx is raised. A
+refused claim is evidence. A failed cube test is evidence. Neither is a
+non-event.
+
+**Reason.** In an audit, the record of a failure is the evidence. A system that
+keeps only approvals cannot answer "was this tested and rejected, or never
+tested?" — which is exactly the question that made Gujarat's bar-chart register
+unable to support a condition-based decision.
+
+**Alternatives considered.** Logging only — rejected, a log line is not a
+durable record and cannot be reported on. Raising without persisting — rejected,
+that is the current behaviour.
+
+**Trade-offs.** Table growth on refused records. Bounded in practice, and worth
+more than it costs.
+
+**Future reconsideration trigger.** Volume. If refused claims become numerous
+enough to matter, they need their own status lifecycle and a reporting view
+rather than sharing the claims table.
