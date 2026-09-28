@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import UTC, datetime, timedelta
 
@@ -10,15 +11,35 @@ from sqlalchemy import select
 from .database import SessionLocal
 from .models import User
 
+logger = logging.getLogger(__name__)
+
 ALGORITHM = "HS256"
 TOKEN_TTL_HOURS = 8
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 
+_DEV_SECRET = "local-development-secret-change-before-production"
+
 
 def jwt_secret() -> str:
-    # The fallback is solely for local seeded-demo use. Render must set JWT_SECRET.
-    return os.getenv("JWT_SECRET", "local-development-secret-change-before-production")
+    """Resolve the token-signing key.
+
+    A missing JWT_SECRET falls back to a well-known value so the local seeded
+    demo runs out of the box. That fallback is a real risk, so it is announced
+    loudly at startup rather than applied quietly. Every deployed instance must
+    set JWT_SECRET.
+    """
+    configured = os.getenv("JWT_SECRET", "").strip()
+    if not configured:
+        return _DEV_SECRET
+    return configured
+
+
+if not os.getenv("JWT_SECRET", "").strip():
+    logger.warning(
+        "SECURITY: JWT_SECRET is not set. Tokens are being signed with a publicly "
+        "known development key. Set JWT_SECRET on every deployed instance."
+    )
 
 
 def hash_password(password: str) -> str:

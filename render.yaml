@@ -4,8 +4,30 @@ services:
     runtime: python
     region: singapore
     rootDir: apps/api
-    # Free Render services run migrations during build; paid tiers can instead use preDeployCommand.
+    # Migrations are a SEPARATE step from serving. Never join them with `&&` in a
+    # single command field: Render passes a whole field to one process, so
+    # `alembic upgrade head && uvicorn ...` reaches alembic as the literal
+    # arguments `&& uvicorn app.main:app ...` and it exits 2.
+    #
+    # Free tier: no preDeployCommand, so migrations run at build time.
+    # Paid tier: move this to `preDeployCommand` instead.
     buildCommand: pip install -r requirements.txt && alembic upgrade head
+    # MUST use $PORT. Render injects it per service; a hardcoded 10000 or 8000
+    # will bind the wrong port and the health check will never pass.
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
-    autoDeployTrigger: checksPass
+    # `checksPass` deadlocks a first deploy: the check cannot pass until the
+    # service is running, and the service does not run until it deploys.
+    autoDeployTrigger: commit
+    autoDeploy: true
+    # Required environment variables (set these in the Render dashboard):
+    #   DATABASE_URL   -> postgresql://...   (Neon/Supabase)
+    #   JWT_SECRET     -> any long random string
+    #   CORS_ORIGINS   -> the exact frontend origin, comma separated
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
