@@ -4,24 +4,27 @@ services:
     runtime: python
     region: singapore
     rootDir: apps/api
-    # Migrations are a SEPARATE step from serving. Never join them with `&&` in a
-    # single command field: Render passes a whole field to one process, so
-    # `alembic upgrade head && uvicorn ...` reaches alembic as the literal
-    # arguments `&& uvicorn app.main:app ...` and it exits 2.
+    # The build step only installs. Migrations run inside serve.py at startup,
+    # immediately before the server binds, because Render's free tier has no
+    # preDeployCommand and a Start Command cannot contain `&&` -- Render passes
+    # the whole field to one process, so `alembic upgrade head && uvicorn ...`
+    # reaches alembic as literal arguments and it exits 2.
     #
-    # Free tier: no preDeployCommand, so migrations run at build time.
-    # Paid tier: move this to `preDeployCommand` instead.
-    buildCommand: pip install -r requirements.txt && alembic upgrade head
-    # MUST use $PORT. Render injects it per service; a hardcoded 10000 or 8000
-    # will bind the wrong port and the health check will never pass.
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    # Running them in one process also removes the worst failure mode available
+    # here: a build that succeeds without migrating, followed by a deploy that
+    # reports success and then dies on a missing relation at first request.
+    buildCommand: pip install -r requirements.txt
+    # MUST be a single command with no shell operators, and MUST use $PORT.
+    # Render injects PORT per service; a hardcoded 10000 or 8000 binds the wrong
+    # socket and the health check never passes.
+    startCommand: python serve.py
     healthCheckPath: /health
     # `checksPass` deadlocks a first deploy: the check cannot pass until the
     # service is running, and the service does not run until it deploys.
     autoDeployTrigger: commit
     autoDeploy: true
-    # Required environment variables (set these in the Render dashboard):
-    #   DATABASE_URL   -> postgresql://...   (Neon/Supabase)
+    # Required environment variables:
+    #   DATABASE_URL   -> postgresql://...  (Render Postgres or Supabase)
     #   JWT_SECRET     -> any long random string
     #   CORS_ORIGINS   -> the exact frontend origin, comma separated
     envVars:

@@ -63,8 +63,7 @@ Requires Python 3.11+ and Node 20+.
 # API  -> http://localhost:8000  (docs at /docs)
 cd apps/api
 pip install -r requirements.txt
-python -m alembic upgrade head
-python -m uvicorn app.main:app --reload --port 8000
+python serve.py            # migrates, then serves
 
 # Web -> http://localhost:3000
 cd apps/web
@@ -72,9 +71,13 @@ npm install
 npm run dev
 ```
 
-The database seeds itself on first run: a nine-bridge portfolio (three per
-phase), six divisions, and nine demo accounts. Seeding is **additive and
-idempotent** per `asset_code` — it never deletes or overwrites existing rows.
+`serve.py` runs `alembic upgrade head` and then starts the server in one
+process. Use it rather than invoking alembic and uvicorn separately — see
+"Deployment" below for why.
+
+The database seeds itself on first run: a nine-bridge portfolio, six divisions,
+and nine demo accounts. Seeding is **additive and idempotent** per `asset_code`
+— it never deletes or overwrites existing rows.
 
 ### Demo accounts
 
@@ -202,9 +205,40 @@ The frontend is on Vercel. The API is on Render.
 | Field | Value |
 |---|---|
 | Root Directory | `apps/api` |
-| Build Command | `pip install -r requirements.txt && alembic upgrade head` |
-| Start Command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `python serve.py` |
 | Health Check Path | `/health` |
+
+That is the whole configuration. Migrations are not in either field, on
+purpose.
+
+### Why there is no `&&` and no alembic in the dashboard
+
+This is worth understanding, because both obvious approaches have already
+failed on this project and both fail *quietly*.
+
+**Putting `alembic upgrade head` in the build step** is Render's own documented
+pattern, and it is right in general. Here it was missed, `pip install` alone
+succeeded, the deploy reported success, and the application then died at
+startup on `relation "clearance_records" does not exist` — a table migration
+0003 creates. The worst part was not the crash: it was that the deploy looked
+fine.
+
+**Putting it in the start step as `alembic upgrade head && uvicorn ...`**
+cannot work. Render passes the entire field to a single process, so alembic
+receives `&& uvicorn app.main:app --host 0.0.0.0 --port $PORT` as literal
+arguments and exits 2.
+
+So `serve.py` does both, in one process, and the Start Command is a single
+argument-free command. Three consequences:
+
+- `&&` cannot be fat-fingered, because there is nowhere to put it.
+- An unmigrated database **cannot start**, so the failure is a short message at
+  deploy time instead of a 200-frame SQLAlchemy traceback during your demo.
+- The build step is only `pip install`, so there is nothing to remember.
+
+`serve.py` also prints `Database is at head.` before binding, which is the line
+to look for in the Render log when a deploy misbehaves.
 
 **Environment**
 
@@ -216,11 +250,10 @@ The frontend is on Vercel. The API is on Render.
 
 Two traps that cost real time:
 
-- **Never join commands with `&&` in a Start Command.** Render passes the
-  whole field to a single process, so `alembic upgrade head && uvicorn …`
-  reaches alembic as literal arguments and it exits 2. Migrations belong in the
-  build step, which is a different process.
-- **Never hardcode `--port`.** Render injects `$PORT` per service.
+- **Never hardcode `--port`.** Render injects `$PORT` per service. A hardcoded
+  10000 or 8000 binds the wrong socket and the health check never passes.
+  `serve.py` reads `PORT` for you.
+- **Never put `&&` in a Start Command.** Covered above.
 
 `JWT_SECRET` falls back to a development key when unset so the local demo works
 with no setup, and logs a loud `WARNING` when it does. On a deployed instance,
