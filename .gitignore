@@ -1,0 +1,58 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local data
+*.sqlite
+*.sqlite3
+
+# Playwright
+playwright-report/
+test-results/
+.playwright-mcp/
+blob-report/
+.playwright/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local hackathon notes
+questions.md
+promptscodex.md
+
+# Local research dossiers: preserved on the workstation, not published.
+docs/bridge-mvp-master-plan.md
+docs/bridge-research-dossier.md
+docs/final_research.md
+docs/research-bridges.md
+docs/research.md
+docs/researchassets.md
+docs/differentiation.md

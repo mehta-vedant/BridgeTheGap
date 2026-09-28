@@ -1,0 +1,33 @@
+# Normalize line endings.
+# Store LF in the repository, check out LF everywhere.
+# Prevents phantom whole-file diffs when Windows, Linux CI, Docker build
+# servers, or teammates all touch the same files.
+* text=auto eol=lf
+
+# Files git's heuristics may misdetect. Force them to stay binary so
+# line-ending normalization never corrupts them.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.ico binary
+*.icns binary
+*.mp4 binary
+*.mov binary
+*.mp3 binary
+*.wav binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+*.gz binary
+*.sqlite binary
+*.sqlite3 binary
+
+# Lockfiles must never be rewritten.
+package-lock.json -text
+pnpm-lock.yaml -text
+yarn.lock -text
+poetry.lock -text
+uv.lock -text
