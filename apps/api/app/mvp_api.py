@@ -12,8 +12,8 @@ from .database import SessionLocal
 from .models import User
 from .mvp_models import (
     Asset, ATR, AuditEvent, BridgeProfile, CompanyUserMembership, ContractRecord,
-    DefectRecord, GateDefinition, GateEvaluation, InspectionRecord, Milestone,
-    OrganisationUnit, PolicyVersion, PriceVariationClaim, ProjectRecord,
+    ClearanceRecord, DefectRecord, GateDefinition, GateEvaluation, InspectionRecord, Milestone,
+    OrganisationUnit, PolicyVersion, PriceVariationClaim, ProjectRecord, ProjectReport,
     RoleDefinition, ServiceStateRequest, TenderBidRecord, TenderRecord, TestEvaluation,
     TestSample, QualityTest, UserRoleAssignment, WorkOrderRecord, RectificationSubmission,
     WorkVerification,
@@ -85,6 +85,21 @@ class PassportCreateInput(BaseModel):
     project_title: str = Field(min_length=5, max_length=240)
     project_type: str = Field(default="NEW_CONSTRUCTION", pattern=r"^(NEW_CONSTRUCTION|REHABILITATION|REPLACEMENT)$")
     estimate_amount: Decimal = Field(gt=0, max_digits=15, decimal_places=2)
+    latitude: Decimal | None = Field(default=None, ge=-90, le=90, max_digits=9, decimal_places=6)
+    longitude: Decimal | None = Field(default=None, ge=-180, le=180, max_digits=9, decimal_places=6)
+
+
+class ReportInput(BaseModel):
+    report_type: str = Field(pattern="^(PFR|FSR|DPR|AA|TS)$")
+    reference: str = Field(min_length=3, max_length=240)
+    source_class: str = Field(default="NATIONAL_REFERENCE", pattern="^(GUJARAT_VERIFIED|NATIONAL_REFERENCE|DEMO_CONFIGURABLE|NOT_ESTABLISHED)$")
+
+
+class ClearanceInput(BaseModel):
+    clearance_type: str = Field(pattern="^(GAD|ESP|LAND_USE|FOREST_WILDLIFE|ENVIRONMENTAL)$")
+    status: str = Field(pattern="^(PENDING|SUBMITTED|APPROVED|NOT_REQUIRED)$")
+    reference: str | None = Field(default=None, max_length=240)
+    source_class: str = Field(default="GUJARAT_VERIFIED", pattern="^(GUJARAT_VERIFIED|NATIONAL_REFERENCE|DEMO_CONFIGURABLE|NOT_ESTABLISHED)$")
 
 
 def session_dependency():
@@ -128,6 +143,8 @@ def asset_view(asset: Asset, profile: BridgeProfile | None = None) -> dict:
         "asset_type": asset.asset_type, "lifecycle_state": asset.lifecycle_state,
         "service_state": asset.service_state, "condition_grade": asset.condition_grade,
         "risk_flag": asset.risk_flag, "district": asset.district,
+        "latitude": float(asset.latitude) if asset.latitude is not None else None,
+        "longitude": float(asset.longitude) if asset.longitude is not None else None,
         "bridge": None if not profile else {"class": profile.bridge_class, "route": profile.route_name, "chainage_km": float(profile.chainage_km) if profile.chainage_km is not None else None, "length_m": float(profile.length_m) if profile.length_m is not None else None, "span_count": profile.span_count},
     }
 
@@ -180,7 +197,7 @@ def create_bridge_passport(payload: PassportCreateInput, user: User = Depends(ge
     owner_unit_id = assignment.organisation_unit_id if assignment else session.scalar(select(OrganisationUnit.id).where(OrganisationUnit.kind == "DIVISION").limit(1))
     if not owner_unit_id:
         raise HTTPException(status.HTTP_409_CONFLICT, "No owning division is configured for this user")
-    asset = Asset(id=uid("ASSET"), asset_code=payload.asset_code, asset_type="BRIDGE", canonical_name=payload.canonical_name, owner_unit_id=owner_unit_id, lifecycle_state="SANCTION_AND_CLEARANCE", service_state="OPEN", condition_grade=None, risk_flag=None, district=payload.district)
+    asset = Asset(id=uid("ASSET"), asset_code=payload.asset_code, asset_type="BRIDGE", canonical_name=payload.canonical_name, owner_unit_id=owner_unit_id, lifecycle_state="SANCTION_AND_CLEARANCE", service_state="OPEN", condition_grade=None, risk_flag=None, district=payload.district, latitude=payload.latitude, longitude=payload.longitude)
     profile = BridgeProfile(asset_id=asset.id, bridge_class=payload.bridge_class, route_name=payload.route_name, chainage_km=payload.chainage_km, length_m=payload.length_m, span_count=payload.span_count)
     project = ProjectRecord(id=uid("PROJ"), asset_id=asset.id, owner_unit_id=owner_unit_id, project_type=payload.project_type, title=payload.project_title, state="SANCTION_AND_CLEARANCE", estimate_amount=payload.estimate_amount, created_by_id=user.id)
     tender = TenderRecord(id=uid("TEN"), project_id=project.id, tender_number=f"DRAFT-{payload.asset_code[-12:]}", status="DRAFT", estimated_cost=payload.estimate_amount, invited_by_id=user.id)
@@ -188,6 +205,38 @@ def create_bridge_passport(payload: PassportCreateInput, user: User = Depends(ge
     audit(session, user, asset.id, "ASSET", asset.id, "ASSET_PASSPORT_CREATED", new_value={"asset_code": asset.asset_code, "project_id": project.id, "lifecycle_state": asset.lifecycle_state}, reason="Executive Engineer initiated permanent bridge identity and sanction-stage project.")
     session.commit()
     return {"asset": asset_view(asset, profile), "project_id": project.id, "tender_id": tender.id, "next_action": "Record clearance evidence and evaluate the land-readiness gate before tender publication."}
+
+
+@router.post("/projects/{project_id}/reports", status_code=status.HTTP_201_CREATED)
+def record_project_report(project_id: str, payload: ReportInput, user: User = Depends(get_current_user), session: Session = Depends(session_dependency)) -> dict:
+    require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER", "SUPERINTENDING_ENGINEER")
+    project = session.get(ProjectRecord, project_id)
+    if not project:
+        raise HTTPException(404, "Project not found")
+    existing = session.scalar(select(ProjectReport).where(ProjectReport.project_id == project.id, ProjectReport.report_type == payload.report_type))
+    if existing:
+        raise HTTPException(status.HTTP_409_CONFLICT, f"{payload.report_type} is already recorded for this project")
+    report = ProjectReport(id=uid("REPORT"), project_id=project.id, report_type=payload.report_type, status="SUBMITTED", reference=payload.reference, source_class=payload.source_class, prepared_by_id=user.id)
+    session.add(report)
+    audit(session, user, project.asset_id, "PROJECT_REPORT", report.id, "REPORT_RECORDED", new_value={"report_type": report.report_type, "source_class": report.source_class}, reason=report.reference)
+    session.commit()
+    return {"id": report.id, "report_type": report.report_type, "status": report.status}
+
+
+@router.post("/projects/{project_id}/clearances", status_code=status.HTTP_201_CREATED)
+def record_clearance(project_id: str, payload: ClearanceInput, user: User = Depends(get_current_user), session: Session = Depends(session_dependency)) -> dict:
+    require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER", "SUPERINTENDING_ENGINEER")
+    project = session.get(ProjectRecord, project_id)
+    if not project:
+        raise HTTPException(404, "Project not found")
+    existing = session.scalar(select(ClearanceRecord).where(ClearanceRecord.project_id == project.id, ClearanceRecord.clearance_type == payload.clearance_type))
+    if existing:
+        raise HTTPException(status.HTTP_409_CONFLICT, f"{payload.clearance_type} is already recorded for this project")
+    clearance = ClearanceRecord(id=uid("CLEAR"), project_id=project.id, clearance_type=payload.clearance_type, status=payload.status, reference=payload.reference, source_class=payload.source_class, recorded_by_id=user.id)
+    session.add(clearance)
+    audit(session, user, project.asset_id, "CLEARANCE", clearance.id, "CLEARANCE_RECORDED", new_value={"type": clearance.clearance_type, "status": clearance.status}, reason=clearance.reference)
+    session.commit()
+    return {"id": clearance.id, "clearance_type": clearance.clearance_type, "status": clearance.status}
 
 
 @router.get("/assets/{asset_id}/passport")
@@ -198,12 +247,14 @@ def asset_passport(asset_id: str, user: User = Depends(get_current_user), sessio
     tender = session.scalar(select(TenderRecord).where(TenderRecord.project_id == project.id)) if project else None
     contract = session.scalar(select(ContractRecord).where(ContractRecord.project_id == project.id)) if project else None
     defects = session.scalars(select(DefectRecord).where(DefectRecord.asset_id == asset.id).order_by(DefectRecord.status)).all()
+    reports = session.scalars(select(ProjectReport).where(ProjectReport.project_id == project.id).order_by(ProjectReport.report_type)).all() if project else []
+    clearances = session.scalars(select(ClearanceRecord).where(ClearanceRecord.project_id == project.id).order_by(ClearanceRecord.clearance_type)).all() if project else []
     work_orders = []
     for defect in defects:
         work_orders.extend(session.scalars(select(WorkOrderRecord).where(WorkOrderRecord.defect_id == defect.id)).all())
     gates = session.scalars(select(GateEvaluation).where(GateEvaluation.asset_id == asset.id).order_by(GateEvaluation.evaluated_at.desc())).all()
     events = session.scalars(select(AuditEvent).where(AuditEvent.asset_id == asset.id).order_by(AuditEvent.created_at.desc()).limit(40)).all()
-    return {"asset": asset_view(asset, session.get(BridgeProfile, asset.id)), "project": None if not project else {"id": project.id, "title": project.title, "state": project.state, "type": project.project_type, "estimate_amount": float(project.estimate_amount) if project.estimate_amount else None}, "tender": None if not tender else {"id": tender.id, "number": tender.tender_number, "status": tender.status}, "contract": None if not contract else {"id": contract.id, "number": contract.contract_number, "state": contract.state, "awarded_amount": float(contract.awarded_amount)}, "gates": [{"id": gate.id, "status": gate.status, "explanation": gate.explanation, "missing_requirements": gate.missing_requirements} for gate in gates], "defects": [{"id": defect.id, "description": defect.description, "risk_level": defect.risk_level, "status": defect.status, "due_on": defect.due_on} for defect in defects], "work_orders": [{"id": work.id, "defect_id": work.defect_id, "status": work.status, "description": work.description, "company_id": work.company_id} for work in work_orders], "timeline": [{"id": event.id, "at": event.created_at.isoformat(), "event_type": event.event_type, "reason": event.reason, "new_value": event.new_value} for event in events]}
+    return {"asset": asset_view(asset, session.get(BridgeProfile, asset.id)), "project": None if not project else {"id": project.id, "title": project.title, "state": project.state, "type": project.project_type, "estimate_amount": float(project.estimate_amount) if project.estimate_amount else None}, "tender": None if not tender else {"id": tender.id, "number": tender.tender_number, "status": tender.status}, "contract": None if not contract else {"id": contract.id, "number": contract.contract_number, "state": contract.state, "awarded_amount": float(contract.awarded_amount)}, "reports": [{"id": report.id, "type": report.report_type, "status": report.status, "reference": report.reference, "source_class": report.source_class} for report in reports], "clearances": [{"id": clearance.id, "type": clearance.clearance_type, "status": clearance.status, "reference": clearance.reference, "source_class": clearance.source_class} for clearance in clearances], "gates": [{"id": gate.id, "status": gate.status, "explanation": gate.explanation, "missing_requirements": gate.missing_requirements} for gate in gates], "defects": [{"id": defect.id, "description": defect.description, "risk_level": defect.risk_level, "status": defect.status, "due_on": defect.due_on} for defect in defects], "work_orders": [{"id": work.id, "defect_id": work.defect_id, "status": work.status, "description": work.description, "company_id": work.company_id} for work in work_orders], "timeline": [{"id": event.id, "at": event.created_at.isoformat(), "event_type": event.event_type, "reason": event.reason, "new_value": event.new_value} for event in events]}
 
 
 @router.post("/projects/{project_id}/land-readiness")

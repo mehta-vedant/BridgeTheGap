@@ -40,6 +40,11 @@ def test_executive_engineer_creates_permanent_passport_and_project() -> None:
         assert passport.status_code == 200
         assert passport.json()["project"]["title"] == "Orsang River Bridge Renewal"
         assert passport.json()["tender"]["status"] == "DRAFT"
+        project_id = body["project_id"]
+        report = client.post(f"/api/mvp/projects/{project_id}/reports", json={"report_type": "DPR", "reference": "DPR-2026-001", "source_class": "NATIONAL_REFERENCE"}, headers=engineer)
+        assert report.status_code == 201
+        clearance = client.post(f"/api/mvp/projects/{project_id}/clearances", json={"clearance_type": "GAD", "status": "SUBMITTED", "reference": "GAD-2026-001", "source_class": "GUJARAT_VERIFIED"}, headers=engineer)
+        assert clearance.status_code == 201
 
 
 def test_contractor_cannot_create_bridge_passport() -> None:

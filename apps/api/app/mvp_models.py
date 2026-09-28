@@ -136,6 +136,33 @@ class ProjectRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class ProjectReport(Base):
+    __tablename__ = "project_reports"
+    __table_args__ = (UniqueConstraint("project_id", "report_type", name="uq_project_report_type"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("lifecycle_projects.id"), index=True)
+    report_type: Mapped[str] = mapped_column(String(20))  # PFR, FSR, DPR, AA, TS
+    status: Mapped[str] = mapped_column(String(30), default="DRAFT", index=True)
+    reference: Mapped[str] = mapped_column(String(240))
+    source_class: Mapped[str] = mapped_column(String(40))
+    prepared_by_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    reviewed_by_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ClearanceRecord(Base):
+    __tablename__ = "clearance_records"
+    __table_args__ = (UniqueConstraint("project_id", "clearance_type", name="uq_project_clearance_type"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("lifecycle_projects.id"), index=True)
+    clearance_type: Mapped[str] = mapped_column(String(60))
+    status: Mapped[str] = mapped_column(String(30), default="PENDING", index=True)
+    reference: Mapped[str | None] = mapped_column(String(240))
+    source_class: Mapped[str] = mapped_column(String(40))
+    recorded_by_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 class SourceReference(Base):
     __tablename__ = "source_references"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
@@ -205,6 +232,22 @@ class DocumentLink(Base):
     document_id: Mapped[str] = mapped_column(ForeignKey("documents.id"), index=True)
     entity_type: Mapped[str] = mapped_column(String(60), index=True)
     entity_id: Mapped[str] = mapped_column(String(36), index=True)
+
+
+class EvidenceRecord(Base):
+    __tablename__ = "evidence_records"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), index=True)
+    defect_id: Mapped[str | None] = mapped_column(ForeignKey("lifecycle_defects.id"), index=True)
+    work_order_id: Mapped[str | None] = mapped_column(ForeignKey("lifecycle_work_orders.id"), index=True)
+    evidence_type: Mapped[str] = mapped_column(String(30))  # BEFORE_PHOTO, AFTER_PHOTO, SITE_NOTE, AS_BUILT_REF
+    reference_url: Mapped[str] = mapped_column(Text)
+    caption: Mapped[str] = mapped_column(Text)
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    latitude: Mapped[float | None] = mapped_column(Numeric(9, 6))
+    longitude: Mapped[float | None] = mapped_column(Numeric(9, 6))
+    submitted_by_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    verification_state: Mapped[str] = mapped_column(String(30), default="SUBMITTED")
 
 
 class TenderRecord(Base):
