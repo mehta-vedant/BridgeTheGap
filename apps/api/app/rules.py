@@ -24,9 +24,9 @@ Section references are to ``docs/research_3phase_opencode.md``.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date, timedelta
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 RECORD = "docs/research_3phase_opencode.md"
 
@@ -90,8 +90,10 @@ def concrete_cube_acceptance(samples: list[Decimal], specified: Decimal) -> Verd
             value=None,
             basis=basis,
             reasons=(
-                f"A verdict needs {CUBE_WINDOW} consecutive samples; {len(samples)} recorded. "
-                "The rule is a mean over four consecutive samples, so fewer than four cannot be evaluated.",
+                (
+                    f"A verdict needs {CUBE_WINDOW} consecutive samples; {len(samples)} recorded. "
+                    "The rule is a mean over four consecutive samples, so fewer than four cannot be evaluated."
+                ),
             ),
         )
 
@@ -662,8 +664,10 @@ def pv_ceiling(estimated_cost: Decimal, cement: Decimal, steel: Decimal, asphalt
             ()
             if ceiling > 0
             else (
-                f"The 5% headroom of {_money(headroom)} is fully consumed by the Cement, Steel and Asphalt "
-                f"value of {_money(deducted)}, so no price variation is payable on this work.",
+                (
+                    f"The 5% headroom of {_money(headroom)} is fully consumed by the Cement, Steel and Asphalt "
+                    f"value of {_money(deducted)}, so no price variation is payable on this work."
+                ),
             )
         ),
     )
@@ -765,9 +769,7 @@ def price_variation(components: list[PvComponent], months_elapsed: int, estimate
             }
         )
 
-    if index_integrity_failed:
-        computed = Decimal("0")
-    elif months_elapsed <= PV_FIRST_MONTHS_EXCLUDED:
+    if index_integrity_failed or months_elapsed <= PV_FIRST_MONTHS_EXCLUDED:
         computed = Decimal("0")
     else:
         computed = total
@@ -991,8 +993,10 @@ def design_life_justified(regular_inspection: bool, regular_maintenance: bool, r
             ()
             if not missing
             else (
-                f"The {DESIGN_LIFE_YEARS}-year design life is conditional on regular inspection, maintenance "
-                f"and repairs. Not established: {', '.join(missing)}.",
+                (
+                    f"The {DESIGN_LIFE_YEARS}-year design life is conditional on regular inspection, maintenance "
+                    f"and repairs. Not established: {', '.join(missing)}."
+                ),
             )
         ),
     )

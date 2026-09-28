@@ -32,8 +32,8 @@ from sqlalchemy.orm import Session
 from .mvp_models import (
     Asset,
     CompanyUserMembership,
-    ContractRecord,
     ContractorCompany,
+    ContractRecord,
     DefectRecord,
     GateEvaluation,
     ProjectRecord,

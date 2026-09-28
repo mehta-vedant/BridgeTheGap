@@ -389,7 +389,6 @@ def list_assets(
         raise role_denied(["an authenticated role assignment"], f"{rules.RECORD} sec 4A.8")
 
     scope_rows = visible_assets(session, user, roles, order_by=Asset.asset_code)
-    scope_ids = {asset.id for asset in scope_rows}
     scoped_facts = phase_facts(session, [asset.id for asset in scope_rows])
     scope_total = len(scope_rows)
 
@@ -572,7 +571,7 @@ def asset_passport(asset_id: str, user: User = Depends(get_current_user), sessio
                         "id": bid.id,
                         "company_id": bid.company_id,
                         "own_bid": "CONTRACTOR" in roles,
-                        "price_amount": float(bid.price_amount) if can_see_prices else float(bid.price_amount),
+                        "price_amount": float(bid.price_amount),
                         "technical_status": bid.technical_status,
                         "redacted": False,
                     }
@@ -874,7 +873,7 @@ def award_tender(tender_id: str, user: User = Depends(get_current_user), session
         raise gate_blocked(
             f"The winning price is materially above the estimate of {tender.estimated_cost}. An award at this "
             "level on a B-2 form is not available above the B-1 ceiling.",
-            [f"Re-invite on B-1, or record the revised estimate and its sanction."],
+            ["Re-invite on B-1, or record the revised estimate and its sanction."],
             f"{rules.RECORD} sec 4A.2 (B-1 is mandatory above the ceiling)",
         )
 

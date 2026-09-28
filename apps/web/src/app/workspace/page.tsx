@@ -129,10 +129,20 @@ export default function Workspace() {
   useEffect(() => {
     const saved = window.localStorage.getItem("btg-session");
     if (!saved) return;
-    try {
-      const session = JSON.parse(saved) as { token: string; user: User };
-      setToken(session.token); setUser(session.user); void load(session.token);
-    } catch { window.localStorage.removeItem("btg-session"); }
+    // The restore runs inside an async continuation rather than inline in the
+    // effect body. Setting state synchronously in an effect body triggers a
+    // cascading render before the first paint, and it puts a sign-in round trip
+    // in front of the register render for no benefit.
+    void (async () => {
+      try {
+        const session = JSON.parse(saved) as { token: string; user: User };
+        setToken(session.token);
+        setUser(session.user);
+        await load(session.token);
+      } catch {
+        window.localStorage.removeItem("btg-session");
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   async function signIn(email: string) {

@@ -362,7 +362,6 @@ def _seed_asset(session: Session, spec: dict, users: dict[str, User], ref: dict,
     engineer = users["engineer@demo.local"]
     inspector = users["inspector@demo.local"]
     quality = users["quality@demo.local"]
-    finance = users["finance@demo.local"]
     contractor = users["contractor@demo.local"]
 
     unit = ref["units"][DIVISION_CODE_BY_ID[spec["division"]]]

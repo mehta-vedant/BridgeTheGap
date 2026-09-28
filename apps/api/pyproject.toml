@@ -3,7 +3,16 @@ line-length = 100
 target-version = "py313"
 
 [tool.ruff.lint]
-ignore = ["B008"] # FastAPI dependency injection intentionally uses Depends in signatures.
+ignore = [
+  "B008",  # FastAPI dependency injection intentionally uses Depends in signatures.
+  # FURB157 rewrites Decimal("1.1") to Decimal(1.1). The string form is deliberate
+  # everywhere in this codebase: it makes the origin of a numeric literal
+  # explicit and makes a float literal a visible mistake rather than a silent
+  # precision loss. This project computes price variation on index bases, where
+  # an interchanged base produced a Rs 55.70 lakh error, so Decimal construction
+  # style is a correctness convention and not a formatting preference.
+  "FURB157",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
