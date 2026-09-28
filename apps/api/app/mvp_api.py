@@ -74,7 +74,7 @@ class TestInput(BaseModel):
 
 
 class PassportCreateInput(BaseModel):
-    asset_code: str = Field(pattern=r"^[A-Z0-9-]{6,64}$")
+    asset_code: str | None = Field(default=None, pattern=r"^[A-Z0-9-]{6,64}$")
     canonical_name: str = Field(min_length=5, max_length=240)
     district: str = Field(min_length=2, max_length=100)
     bridge_class: str = Field(pattern=r"^(MAJOR_BRIDGE|MINOR_BRIDGE|ROB|RUB|CULVERT)$")
@@ -109,6 +109,12 @@ def session_dependency():
 
 def uid(prefix: str) -> str:
     return f"{prefix}-{uuid4()}"
+
+
+def bridge_asset_code(district: str) -> str:
+    """Generate a readable, collision-resistant demo registry identifier."""
+    district_code = "".join(character for character in district.upper() if character.isalnum())[:3] or "GEN"
+    return f"BRG-GJ-{district_code}-{datetime.now(UTC).year}-{uuid4().hex[:6].upper()}"
 
 
 def actor_roles(session: Session, user: User) -> set[str]:
@@ -191,16 +197,17 @@ def list_assets(q: str | None = None, lifecycle_state: str | None = None, servic
 def create_bridge_passport(payload: PassportCreateInput, user: User = Depends(get_current_user), session: Session = Depends(session_dependency)) -> dict:
     """Create the permanent bridge identity and its initiating project atomically."""
     require(session, user, "STATE_ADMIN", "EXECUTIVE_ENGINEER")
-    if session.scalar(select(Asset.id).where(Asset.asset_code == payload.asset_code)):
+    asset_code = payload.asset_code or bridge_asset_code(payload.district)
+    if session.scalar(select(Asset.id).where(Asset.asset_code == asset_code)):
         raise HTTPException(status.HTTP_409_CONFLICT, "An asset with this code already exists")
     assignment = session.scalar(select(UserRoleAssignment).where(UserRoleAssignment.user_id == user.id, UserRoleAssignment.organisation_unit_id.is_not(None), UserRoleAssignment.effective_to.is_(None)))
     owner_unit_id = assignment.organisation_unit_id if assignment else session.scalar(select(OrganisationUnit.id).where(OrganisationUnit.kind == "DIVISION").limit(1))
     if not owner_unit_id:
         raise HTTPException(status.HTTP_409_CONFLICT, "No owning division is configured for this user")
-    asset = Asset(id=uid("ASSET"), asset_code=payload.asset_code, asset_type="BRIDGE", canonical_name=payload.canonical_name, owner_unit_id=owner_unit_id, lifecycle_state="SANCTION_AND_CLEARANCE", service_state="OPEN", condition_grade=None, risk_flag=None, district=payload.district, latitude=payload.latitude, longitude=payload.longitude)
+    asset = Asset(id=uid("ASSET"), asset_code=asset_code, asset_type="BRIDGE", canonical_name=payload.canonical_name, owner_unit_id=owner_unit_id, lifecycle_state="SANCTION_AND_CLEARANCE", service_state="OPEN", condition_grade=None, risk_flag=None, district=payload.district, latitude=payload.latitude, longitude=payload.longitude)
     profile = BridgeProfile(asset_id=asset.id, bridge_class=payload.bridge_class, route_name=payload.route_name, chainage_km=payload.chainage_km, length_m=payload.length_m, span_count=payload.span_count)
     project = ProjectRecord(id=uid("PROJ"), asset_id=asset.id, owner_unit_id=owner_unit_id, project_type=payload.project_type, title=payload.project_title, state="SANCTION_AND_CLEARANCE", estimate_amount=payload.estimate_amount, created_by_id=user.id)
-    tender = TenderRecord(id=uid("TEN"), project_id=project.id, tender_number=f"DRAFT-{payload.asset_code[-12:]}", status="DRAFT", estimated_cost=payload.estimate_amount, invited_by_id=user.id)
+    tender = TenderRecord(id=uid("TEN"), project_id=project.id, tender_number=f"DRAFT-{asset_code[-12:]}", status="DRAFT", estimated_cost=payload.estimate_amount, invited_by_id=user.id)
     session.add_all([asset, profile, project, tender])
     audit(session, user, asset.id, "ASSET", asset.id, "ASSET_PASSPORT_CREATED", new_value={"asset_code": asset.asset_code, "project_id": project.id, "lifecycle_state": asset.lifecycle_state}, reason="Executive Engineer initiated permanent bridge identity and sanction-stage project.")
     session.commit()
