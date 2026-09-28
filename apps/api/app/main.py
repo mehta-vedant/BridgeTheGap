@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from decimal import Decimal
 from uuid import uuid4
@@ -9,6 +10,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .database import SessionLocal
+from .errors import DomainError, domain_error_handler
 from .models import Bid, Bridge, LifecycleEvent, Project, Tender, User, WorkOrder
 from .mvp_api import router as mvp_router
 from .mvp_seed import seed_mvp_demo
@@ -24,10 +26,33 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="R&B Bridge Lifecycle API", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="R&B Bridge Lifecycle API", version="0.4.0", lifespan=lifespan)
+
+# Structured refusals. A DomainError carries a machine code, an explanation,
+# remediation steps and the section of the research record that justifies the
+# rule, and the client renders all four. Registered here rather than in the
+# router so that every route inherits it, including ones added later.
+app.add_exception_handler(DomainError, domain_error_handler)
+
+
+def _cors_origins() -> list[str]:
+    """Origins allowed to call this API from a browser.
+
+    `CORS_ORIGINS` is a comma-separated list. It must be set on any deployed
+    instance, because a hardcoded allowlist silently breaks the frontend the
+    moment the deployment hostname changes.
+    """
+    configured = os.getenv("CORS_ORIGINS", "").strip()
+    origins = [item.strip() for item in configured.split(",") if item.strip()]
+    return origins or [
+        "http://localhost:3000",
+        "https://bridge-the-gap-dusky.vercel.app",
+    ]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://bridge-the-gap-dusky.vercel.app", "http://localhost:3000"],
+    allow_origins=_cors_origins(),
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

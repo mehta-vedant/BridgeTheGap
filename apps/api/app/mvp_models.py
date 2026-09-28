@@ -261,6 +261,11 @@ class TenderRecord(Base):
     opened_by_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
     opening_on: Mapped[Date | None] = mapped_column(Date)
     bid_valid_until: Mapped[Date | None] = mapped_column(Date)
+    # Which bidding form the tender was invited on. B-1 is mandatory above the
+    # sourced ceiling, and the ceiling differs for a bridge than for a road, so
+    # the form is a fact about the tender rather than a label.
+    tender_form: Mapped[str] = mapped_column(String(4), default="B-1")
+    work_order_issued_on: Mapped[Date | None] = mapped_column(Date)
 
 
 class TenderBidRecord(Base):
@@ -285,6 +290,14 @@ class ContractRecord(Base):
     awarded_amount: Mapped[float] = mapped_column(Numeric(15, 2))
     state: Mapped[str] = mapped_column(String(40), default="AWARDED")
     appointed_date: Mapped[Date | None] = mapped_column(Date)
+    # The Completion Certificate date. The 10-year defect liability period runs
+    # from this date, and retention is refunded within 15 days of it, so a
+    # contract that has been completed without recording this date cannot have
+    # its liability period computed at all.
+    completion_date: Mapped[Date | None] = mapped_column(Date)
+    # Physical progress, 0-100. Milestone credit is pro-rated against this, and
+    # it is the recorded fact that says whether a bridge has actually been built.
+    physical_progress: Mapped[float | None] = mapped_column(Numeric(5, 2))
     dlp_policy_version_id: Mapped[str | None] = mapped_column(ForeignKey("policy_versions.id"))
 
 
