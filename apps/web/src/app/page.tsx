@@ -1,26 +1,14 @@
-const stages = [
-  ["01", "Pre-construction", "Need, approvals, tender and award"],
-  ["02", "Construction", "Milestones, quality checks and handover"],
-  ["03", "In service", "Inspection, action, work and verification"],
-];
+"use client";
+
+import { useState } from "react";
+
+const journey = ["Need identified", "Administrative approval", "Technical sanction", "Tender open", "Awarded", "Construction", "Handover", "In service"];
 
 export default function Home() {
-  return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-slate-100">
-      <section className="mx-auto max-w-6xl">
-        <p className="text-sm font-semibold tracking-[.2em] text-cyan-300">GUJARAT R&B · DEMO WORKFLOW</p>
-        <div className="mt-8 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">Bridge lifecycle, with every decision connected.</h1>
-            <p className="mt-5 max-w-2xl text-lg text-slate-300">A fictional-data prototype for accountability from project need through verified maintenance closure.</p>
-          </div>
-          <button className="rounded-lg bg-cyan-300 px-5 py-3 font-semibold text-slate-950">Open demo workspace</button>
-        </div>
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
-          {stages.map(([number, title, description]) => <article key={number} className="rounded-xl border border-slate-700 bg-slate-900 p-6"><p className="text-sm font-bold text-cyan-300">{number}</p><h2 className="mt-8 text-2xl font-semibold">{title}</h2><p className="mt-3 text-slate-300">{description}</p></article>)}
-        </div>
-        <section className="mt-8 rounded-xl border border-slate-700 bg-slate-900/60 p-6"><h2 className="text-xl font-semibold">Prototype boundary</h2><p className="mt-2 text-slate-300">No live government data, GIS, payments, uploads, or structural-safety automation. Every decision is attributable and auditable.</p></section>
-      </section>
-    </main>
-  );
+  const [selected, setSelected] = useState(3);
+  const [attention, setAttention] = useState(true);
+  return <main className="min-h-screen bg-slate-950 text-slate-100"><header className="border-b border-slate-800 px-6 py-5"><div className="mx-auto flex max-w-7xl items-center justify-between"><div><p className="text-xs font-bold tracking-[.2em] text-cyan-300">GUJARAT R&B · DEMO</p><h1 className="mt-1 text-xl font-semibold">BridgeTheGap</h1></div><span className="rounded-full border border-cyan-400/40 px-3 py-1 text-xs text-cyan-200">Fictional demo data</span></div></header><section className="mx-auto max-w-7xl px-6 py-10"><div className="flex flex-col justify-between gap-5 md:flex-row"><div><h2 className="text-3xl font-semibold">Lifecycle command centre</h2><p className="mt-2 text-slate-400">One connected record from sanctioned need to verified maintenance closure.</p></div><button onClick={() => setAttention(!attention)} className="rounded-lg bg-cyan-300 px-4 py-2 font-semibold text-slate-950">{attention ? "Resolve demo alert" : "Restore demo alert"}</button></div><div className="mt-8 grid gap-4 md:grid-cols-4"><Stat label="Active projects" value="01"/><Stat label="Construction value" value="₹1.19 Cr"/><Stat label="Assets in service" value="01"/><Stat label="Action required" value={attention ? "01" : "00"}/></div><div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_.8fr]"><section className="rounded-xl border border-slate-800 bg-slate-900 p-6"><div className="flex items-center justify-between"><h3 className="font-semibold">Mahi River Bridge Rehabilitation</h3><span className="rounded-full bg-amber-400/15 px-3 py-1 text-xs text-amber-200">Tender open</span></div><p className="mt-2 text-sm text-slate-400">PRJ-001 · Vadodara Division · Estimated ₹1.25 Cr</p><ol className="mt-8 space-y-3">{journey.map((step, index) => <li key={step}><button onClick={() => setSelected(index)} className={`flex w-full items-center gap-3 rounded-lg p-3 text-left ${selected === index ? "bg-cyan-300/10 text-cyan-100" : "text-slate-400"}`}><span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs ${index <= selected ? "bg-cyan-300 text-slate-950" : "bg-slate-800"}`}>{index + 1}</span>{step}</button></li>)}</ol></section><aside className="space-y-6"><section className="rounded-xl border border-slate-800 bg-slate-900 p-6"><h3 className="font-semibold">Bid evaluation</h3><div className="mt-5 space-y-3 text-sm"><Bid name="Saffron Infrastructure" amount="₹1.185 Cr" active/><Bid name="Narmada Works" amount="₹1.210 Cr"/></div><button className="mt-6 w-full rounded-lg border border-cyan-400/50 px-4 py-2 text-sm font-semibold text-cyan-200">Record award decision</button></section><section className="rounded-xl border border-slate-800 bg-slate-900 p-6"><h3 className="font-semibold">Bridge passport</h3><p className="mt-2 text-sm text-slate-400">GJ-RB-042 · Mahi River Bridge</p><p className={`mt-5 rounded-lg p-3 text-sm ${attention ? "bg-amber-400/10 text-amber-100" : "bg-emerald-400/10 text-emerald-100"}`}>{attention ? "Inspection finding requires engineering disposition." : "No unresolved disposition required."}</p></section></aside></div></section></main>;
 }
+
+function Stat({ label, value }: { label: string; value: string }) { return <article className="rounded-xl border border-slate-800 bg-slate-900 p-5"><p className="text-sm text-slate-400">{label}</p><p className="mt-3 text-3xl font-semibold">{value}</p></article>; }
+function Bid({ name, amount, active = false }: { name: string; amount: string; active?: boolean }) { return <div className="flex items-center justify-between rounded-lg bg-slate-800 p-3"><span>{name}</span><span className={active ? "font-semibold text-cyan-200" : "text-slate-300"}>{amount}</span></div>; }
