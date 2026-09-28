@@ -9,9 +9,11 @@ def seed_demo_data(session: Session) -> None:
     if not session.scalar(select(Project.id).limit(1)):
         project = Project(id="PRJ-001", name="Mahi River Bridge Rehabilitation", division="Vadodara", estimate=12500000, status="TENDER_OPEN")
         tender = Tender(id="TEN-001", project_id=project.id, status="OPEN")
+        # PostgreSQL enforces the tender-bid foreign key immediately.  Flush the
+        # parent records before adding their child bids (SQLite can mask this).
+        session.add_all([project, tender])
+        session.flush()
         session.add_all([
-            project,
-            tender,
             Bid(id="BID-001", tender_id=tender.id, contractor="Saffron Infrastructure", amount=11850000),
             Bid(id="BID-002", tender_id=tender.id, contractor="Narmada Works", amount=12100000),
             Bridge(id="BRG-001", code="GJ-RB-042", name="Mahi River Bridge", next_inspection="2026-10-15"),
