@@ -1,88 +1,99 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
-
-type Summary = { projects: number; bridges: number; attention_required: number; active_work_orders: number };
-type Bridge = { id: string; code: string; name: string; service_status: string; maintenance_status: string; next_inspection: string };
-type WorkOrder = { id: string; description: string; contractor: string; status: string };
-type User = { name: string; email: string; role: string };
+import { useCallback, useEffect, useState } from "react";
 
 const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const demos = [
-  ["Project manager", "manager@demo.local"],
-  ["Executive engineer", "engineer@demo.local"],
-  ["Bridge inspector", "inspector@demo.local"],
-  ["Contractor", "contractor@demo.local"],
+const demoUsers = [
+  ["Executive Engineer", "engineer@demo.local", "Moves gates, awards work, and validates finance."],
+  ["Bridge Inspector", "inspector@demo.local", "Records condition evidence and safety actions."],
+  ["Contractor", "contractor@demo.local", "Submits a controlled bid and rectification evidence."],
+  ["Manager", "manager@demo.local", "Has portfolio oversight and configured administration."],
 ] as const;
 
-function readableStatus(value: string) {
-  return value.toLowerCase().replaceAll("_", " ");
-}
+type User = { name: string; email: string; role: string };
+type Passport = {
+  asset: { id: string; asset_code: string; name: string; lifecycle_state: string; service_state: string; condition_grade: string; district: string; bridge?: { route?: string; length_m?: number; span_count?: number } };
+  project?: { id: string; title: string; state: string };
+  tender?: { id: string; number: string; status: string };
+  contract?: { id: string; number: string; state: string };
+  gates: { id: string; status: string; explanation: string; missing_requirements: string[] }[];
+  defects: { id: string; description: string; risk_level: string; status: string }[];
+  work_orders: { id: string; defect_id: string; status: string; description: string }[];
+  timeline: { id: string; at: string; event_type: string; reason?: string }[];
+};
+type Dashboard = { metrics: Record<string, number>; actions: { id: string; title: string; detail: string }[] };
+
+function label(value?: string) { return (value ?? "").replaceAll("_", " ").toLowerCase(); }
+function Status({ value }: { value: string }) { const kind = value.includes("FAILED") || value.includes("OPEN") || value.includes("SRI") ? "attention" : value.includes("PASSED") || value.includes("VERIFIED") || value.includes("AWARDED") ? "good" : ""; return <span className={`status ${kind}`}>{label(value)}</span>; }
+function Empty({ text }: { text: string }) { return <p className="empty">{text}</p>; }
 
 export default function Workspace() {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [bridge, setBridge] = useState<Bridge | null>(null);
-  const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
-  const [message, setMessage] = useState("Choose a demo role to enter the workspace.");
+  const [dashboard, setDashboard] = useState<Dashboard | null>(null);
+  const [passport, setPassport] = useState<Passport | null>(null);
+  const [page, setPage] = useState("Dashboard");
+  const [notice, setNotice] = useState("Choose a demo account. All workflow decisions are enforced by the API.");
   const [busy, setBusy] = useState(false);
 
-  const request = useCallback(async (path: string, init: RequestInit = {}) => {
-    const response = await fetch(`${api}${path}`, {
-      ...init,
-      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...init.headers },
-    });
-    if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "Request could not be completed");
+  const read = useCallback(async (path: string, accessToken = token) => {
+    const response = await fetch(`${api}${path}`, { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "The service could not complete that request.");
     return response.json();
   }, [token]);
-
   const load = useCallback(async (accessToken = token) => {
     if (!accessToken) return;
     try {
-      const read = async (path: string) => {
-        const response = await fetch(`${api}${path}`, { headers: { Authorization: `Bearer ${accessToken}` } });
-        if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "Request could not be completed");
-        return response.json();
-      };
-      const [nextSummary, bridges] = await Promise.all([read("/api/dashboard/summary"), read("/api/bridges")]);
-      const mahi = bridges.find((item: Bridge) => item.id === "BRG-001") ?? bridges[0] ?? null;
-      setSummary(nextSummary);
-      setBridge(mahi);
-      if (mahi) setWorkOrders(await read(`/api/bridges/${mahi.id}/work-orders`));
-      setMessage("Live lifecycle data loaded from the API.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "The API is unavailable.");
-    }
-  }, [token]);
-
+      const [nextDashboard, assets] = await Promise.all([read("/api/mvp/dashboard", accessToken), read("/api/mvp/assets", accessToken)]);
+      setDashboard(nextDashboard);
+      if (assets.items?.[0]) setPassport(await read(`/api/mvp/assets/${assets.items[0].id}/passport`, accessToken));
+    } catch (error) { setNotice(error instanceof Error ? error.message : "The API is unavailable."); }
+  }, [read, token]);
+  useEffect(() => {
+    const saved = window.localStorage.getItem("btg-session");
+    if (!saved) return;
+    try {
+      const session = JSON.parse(saved) as { token: string; user: User };
+      queueMicrotask(() => { setToken(session.token); setUser(session.user); void load(session.token); });
+    } catch { window.localStorage.removeItem("btg-session"); }
+  }, [load]);
   async function signIn(email: string) {
     setBusy(true);
     try {
-      const result = await fetch(`${api}/api/auth/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password: "DemoPass123" }) });
-      if (!result.ok) throw new Error("Demo sign-in failed. Confirm the Render deployment has DATABASE_URL and JWT_SECRET.");
-      const body = await result.json();
-      setToken(body.access_token);
-      setUser(body.user);
-      setMessage(`Signed in as ${body.user.name}. Permissions are checked by the API.`);
-      await load(body.access_token);
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Demo sign-in failed."); }
-    finally { setBusy(false); }
+      const response = await fetch(`${api}/api/auth/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password: "DemoPass123" }) });
+      if (!response.ok) throw new Error("Sign-in failed. Start the API, then try again.");
+      const result = await response.json(); setToken(result.access_token); setUser(result.user);
+      window.localStorage.setItem("btg-session", JSON.stringify({ token: result.access_token, user: result.user }));
+      setNotice(`Signed in as ${result.user.name}. Your authority is checked server-side.`); await load(result.access_token);
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Sign-in failed."); } finally { setBusy(false); }
   }
-
-  async function act(path: string, init: RequestInit, success: string) {
-    setBusy(true);
-    try { await request(path, init); setMessage(success); await load(); }
-    catch (error) { setMessage(error instanceof Error ? error.message : "Action could not be completed."); }
-    finally { setBusy(false); }
+  async function command(path: string, body: unknown, success: string) {
+    if (!token) return; setBusy(true);
+    try {
+      const response = await fetch(`${api}${path}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
+      if (!response.ok) throw new Error((await response.json().catch(() => null))?.detail ?? "The workflow transition was rejected.");
+      setNotice(success); await load(token);
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Action failed."); } finally { setBusy(false); }
   }
+  function signOut() { window.localStorage.removeItem("btg-session"); setToken(null); setUser(null); setPassport(null); setDashboard(null); setPage("Dashboard"); }
+  if (!user) return <Login busy={busy} notice={notice} signIn={signIn} />;
 
-  const firstWork = workOrders.find((item) => item.status !== "VERIFIED");
-  const role = user?.role;
-  const cards = [["Active projects", summary?.projects], ["Bridge assets", summary?.bridges], ["Disposition required", summary?.attention_required], ["Active work orders", summary?.active_work_orders]];
-
-  if (!user) return <main className="min-h-screen bg-[#f6f5ef] px-6 py-8 text-[#183127]"><header className="mx-auto flex max-w-6xl items-center justify-between"><Link href="/" className="text-sm font-semibold">← BridgeTheGap</Link><span className="text-xs font-bold tracking-[.15em] text-[#66806a]">SECURE DEMO WORKSPACE</span></header><section className="mx-auto mt-20 max-w-3xl text-center"><p className="text-xs font-bold tracking-[.18em] text-[#66806a]">ROLE-BASED PROTOTYPE</p><h1 className="mt-5 text-5xl font-semibold tracking-[-.06em]">Enter the lifecycle from the right point of view.</h1><p className="mx-auto mt-5 max-w-xl text-lg text-[#536057]">Use one of four seeded roles. The API, rather than the browser, decides what each role can change.</p><div className="mt-10 grid gap-3 sm:grid-cols-2">{demos.map(([label, email]) => <button key={email} disabled={busy} onClick={() => void signIn(email)} className="rounded-2xl border border-[#cdd6cb] bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-[#527657] disabled:opacity-50"><p className="font-semibold">{label}</p><p className="mt-1 text-sm text-[#68756b]">{email}</p><p className="mt-4 text-xs font-bold tracking-[.12em] text-[#527657]">ENTER AS THIS ROLE →</p></button>)}</div><p className="mt-6 text-sm text-[#68756b]">{message}</p></section></main>;
-
-  return <main className="min-h-screen bg-[#07111f] p-6 text-slate-100 md:p-10"><header className="mx-auto flex max-w-7xl items-center justify-between border-b border-slate-800 pb-6"><div><Link href="/" className="text-sm text-cyan-200">← Landing page</Link><h1 className="mt-3 text-3xl font-semibold">Lifecycle command centre</h1><p className="mt-1 text-sm text-slate-400">{user.name} · {readableStatus(user.role)}</p></div><button onClick={() => { setToken(null); setUser(null); setSummary(null); }} className="rounded-full border border-slate-700 px-4 py-2 text-xs font-bold tracking-[.12em] hover:border-cyan-300">SWITCH ROLE</button></header><p className="mx-auto mt-6 max-w-7xl rounded-lg bg-slate-900 p-4 text-sm text-slate-300">{message}</p><section className="mx-auto mt-6 grid max-w-7xl gap-4 md:grid-cols-4">{cards.map(([label, value]) => <article key={String(label)} className="rounded-xl border border-slate-800 bg-slate-900 p-5"><p className="text-sm text-slate-400">{label}</p><p className="mt-3 text-3xl font-semibold text-cyan-200">{value ?? "—"}</p></article>)}</section><section className="mx-auto mt-6 grid max-w-7xl gap-6 lg:grid-cols-2"><article className="rounded-xl border border-slate-800 bg-slate-900 p-6"><p className="text-xs font-bold tracking-[.14em] text-cyan-200">BRIDGE PASSPORT</p><h2 className="mt-2 text-xl font-semibold">{bridge?.name ?? "Loading asset…"}</h2><p className="mt-2 text-slate-400">{bridge?.code} · {bridge ? readableStatus(bridge.service_status) : ""} · next inspection {bridge?.next_inspection}</p><div className="mt-6 rounded-lg bg-slate-800 p-4"><p className="text-xs font-bold tracking-[.12em] text-slate-400">MAINTENANCE STATE</p><p className="mt-2 text-lg font-semibold text-amber-200">{bridge ? readableStatus(bridge.maintenance_status) : "—"}</p></div><div className="mt-5 flex flex-wrap gap-3">{role === "INSPECTOR" && <button disabled={busy || !bridge} onClick={() => bridge && void act(`/api/bridges/${bridge.id}/inspections`, { method: "POST" }, "Inspection recorded; it now requires an accountable disposition.")} className="rounded-full bg-cyan-300 px-4 py-2 text-xs font-bold text-slate-950 disabled:opacity-50">RECORD INSPECTION</button>}{role === "EXECUTIVE_ENGINEER" && bridge?.maintenance_status === "ACTION_REQUIRED" && <button disabled={busy} onClick={() => void act(`/api/bridges/${bridge.id}/work-orders`, { method: "POST", body: JSON.stringify({ description: "Repair deck drainage joint", contractor: "Saffron Infrastructure" }) }, "Work order approved and assigned to the contractor.")} className="rounded-full bg-cyan-300 px-4 py-2 text-xs font-bold text-slate-950 disabled:opacity-50">APPROVE DEMO WORK</button>}{role === "CONTRACTOR" && firstWork?.status === "APPROVED" && <button disabled={busy} onClick={() => void act(`/api/work-orders/${firstWork.id}/complete`, { method: "POST" }, "Work marked complete and awaiting independent verification.")} className="rounded-full bg-cyan-300 px-4 py-2 text-xs font-bold text-slate-950 disabled:opacity-50">MARK WORK COMPLETE</button>}{(role === "EXECUTIVE_ENGINEER" || role === "INSPECTOR") && firstWork?.status === "VERIFICATION_PENDING" && <button disabled={busy} onClick={() => void act(`/api/work-orders/${firstWork.id}/verify`, { method: "POST" }, "Work independently verified; maintenance state is clear.")} className="rounded-full bg-cyan-300 px-4 py-2 text-xs font-bold text-slate-950 disabled:opacity-50">VERIFY COMPLETION</button>}</div></article><article className="rounded-xl border border-slate-800 bg-slate-900 p-6"><p className="text-xs font-bold tracking-[.14em] text-cyan-200">ACCOUNTABILITY QUEUE</p><h2 className="mt-2 text-xl font-semibold">Work cannot close itself.</h2><div className="mt-5 space-y-3">{workOrders.length === 0 ? <p className="rounded-lg bg-slate-800 p-4 text-sm text-slate-400">No maintenance work has been raised for this bridge.</p> : workOrders.map((work) => <div key={work.id} className="rounded-lg bg-slate-800 p-4"><p className="font-semibold">{work.description}</p><p className="mt-1 text-sm text-slate-400">{work.contractor} · {readableStatus(work.status)}</p></div>)}</div><div className="mt-5 rounded-lg bg-amber-300/10 p-4 text-sm text-amber-100">This is fictional demo data. It records accountable decisions; it does not automate structural safety decisions or claim official Gujarat compliance.</div></article></section></main>;
+  const role = user.role; const gate = passport?.gates[0]; const defect = passport?.defects.find((item) => item.status !== "CLOSED"); const work = passport?.work_orders.find((item) => item.status !== "VERIFIED"); const metrics = dashboard?.metrics ?? {}; const canEngineer = role === "EXECUTIVE_ENGINEER" || role === "MANAGER";
+  const nav = ["Dashboard", "Asset passport", "Gates & tender", "Quality control", "Safety & maintenance", "Price variation", "Audit trail"];
+  return <main className="app-shell">
+    <aside className="sidebar"><Link href="/" className="brand">Bridge<span>TheGap</span></Link><p className="eyebrow">R&B lifecycle operations</p><nav>{nav.map((item) => <button key={item} className={page === item ? "selected" : ""} onClick={() => setPage(item)}>{item}</button>)}</nav><div className="account"><p>{user.name}</p><small>{label(role)}</small><button onClick={signOut}>Switch role</button></div></aside>
+    <section className="workspace"><header className="topbar"><div><p className="eyebrow">Gujarat R&B / fictional demo data</p><h1>{page}</h1></div><Status value={passport?.asset.service_state ?? "loading"} /></header><p className="notice" role="status">{notice}</p>
+      {page === "Dashboard" && <><section className="metrics">{[["Registered assets", metrics.assets], ["Active projects", metrics.active_projects], ["Open defects", metrics.open_defects], ["Blocked gates", metrics.failed_gates]].map(([name, value]) => <article key={String(name)}><p>{name}</p><strong>{value ?? "-"}</strong></article>)}</section><section className="split"><article className="panel"><p className="eyebrow">Action required</p><h2>Decisions awaiting an accountable owner</h2>{dashboard?.actions.length ? dashboard.actions.map((item) => <div className="queue" key={item.id}><b>{item.title}</b><p>{item.detail}</p></div>) : <Empty text="No actions are waiting for this seeded scenario." />}</article><AssetSummary passport={passport} /></section></>}
+      {page === "Asset passport" && <section className="split"><AssetSummary passport={passport} /><article className="panel"><p className="eyebrow">Bridge details</p><h2>Digital asset passport</h2><dl><dt>Route</dt><dd>{passport?.asset.bridge?.route ?? "-"}</dd><dt>Length</dt><dd>{passport?.asset.bridge?.length_m ?? "-"} m</dd><dt>Spans</dt><dd>{passport?.asset.bridge?.span_count ?? "-"}</dd><dt>Project</dt><dd>{passport?.project?.title ?? "-"}</dd></dl></article></section>}
+      {page === "Gates & tender" && <section className="split"><article className="panel"><p className="eyebrow">Sanction & clearance</p><h2>Land-readiness gate</h2>{gate ? <><Status value={gate.status} /><p>{gate.explanation}</p>{gate.missing_requirements.map((item) => <p className="missing" key={item}>{item}</p>)}</> : <Empty text="No gate evaluation recorded." />}{canEngineer && passport?.project && <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/projects/${passport.project?.id}/land-readiness`, { possession_percent: 95, handover_reference: "SYN-LAND-MEMO-0142" }, "Land-readiness evidence recorded; the configured gate has been evaluated.")}>Record 95% possession + memo</button>}</article><article className="panel"><p className="eyebrow">Internal controlled tender room</p><h2>{passport?.tender?.number ?? "Tender not available"}</h2><Status value={passport?.tender?.status ?? "DRAFT"} /><p>Department-provisioned contractor access only. This prototype does not integrate with nProcure.</p>{canEngineer && passport?.tender?.status === "DRAFT" && <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/tenders/${passport.tender?.id}/publish`, {}, "Tender published after its evidence gate passed.")}>Publish tender</button>}{role === "CONTRACTOR" && passport?.tender?.status === "PUBLISHED" && <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/tenders/${passport.tender?.id}/bids`, { technical_summary: "Controlled tender-room proposal with a documented execution approach.", price_amount: 24500000 }, "Bid submitted for your contractor company.")}>Submit controlled bid</button>}{canEngineer && passport?.tender?.status === "PUBLISHED" && <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/tenders/${passport.tender?.id}/award`, {}, "Lowest submitted controlled bid selected; contract created.")}>Evaluate and award</button>}</article></section>}
+      {page === "Quality control" && <section className="split"><article className="panel"><p className="eyebrow">Execution evidence</p><h2>Raw samples drive the result</h2><p>Demo thresholds are labelled as synthetic configuration, never Gujarat acceptance criteria.</p>{canEngineer && passport?.contract ? <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/contracts/${passport.contract?.id}/quality-tests`, { test_type: "Concrete cube strength", specified_value: 30, samples: [32, 31, 33] }, "Raw samples evaluated: calculated quality result recorded in the audit trail.")}>Evaluate quality samples</button> : <Empty text="Award the seeded tender first to create the execution contract." />}</article><article className="panel"><p className="eyebrow">Quality control pattern</p><h2>Evidence -&gt; calculation -&gt; review -&gt; ATR</h2><p>Tests retain raw values. A reviewer cannot silently replace a calculated result; an override must be auditable.</p></article></section>}
+      {page === "Safety & maintenance" && <section className="split"><article className="panel"><p className="eyebrow">Post-completion inspection</p><h2>Condition, risk, and service state stay separate</h2><p>Gujarat grades supported: S, SRI, U. Safety restriction is an explicit service decision, not an invented condition grade.</p>{role === "INSPECTOR" && passport && <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/assets/${passport.asset.id}/inspections`, { grade: "SRI", notes: "Deck joint drainage observation requires accountable rectification and reinspection.", risk_level: "SAFETY_REVIEW", atr_months: 3 }, "SRI inspection and ATR recorded.")}>Record SRI inspection</button>}</article><article className="panel"><p className="eyebrow">Maintenance maker-checker</p><h2>{defect ? defect.description : "No open defect"}</h2>{defect && <Status value={defect.status} />}{canEngineer && defect && !work && <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/defects/${defect.id}/work-orders`, { decision_type: "REPAIR", description: "Repair drainage joint and submit rectification evidence for independent verification.", company_id: "COMP-20" }, "Work order approved and assigned.")}>Approve repair work</button>}{role === "CONTRACTOR" && work?.status === "APPROVED" && <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/work-orders/${work.id}/rectification`, { notes: "Joint repaired; drainage path cleared. Evidence reference: SYN-RECT-142." }, "Rectification submitted; it now requires an independent verifier.")}>Submit rectification</button>}{(role === "INSPECTOR" || canEngineer) && work?.status === "VERIFICATION_PENDING" && <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/work-orders/${work.id}/verify`, {}, "Closure independently verified. The contractor could not verify its own work.")}>Independently verify closure</button>}</article></section>}
+      {page === "Price variation" && <article className="panel wide"><p className="eyebrow">Finance control</p><h2>Preserve the claim, calculation, variance, and policy version.</h2><p>Submitted value is never overwritten by calculated value.</p>{canEngineer && passport?.contract ? <button className="primary" disabled={busy} onClick={() => void command(`/api/mvp/contracts/${passport.contract?.id}/price-variation`, { submitted_amount: 1280000, calculated_amount: 1254500 }, "Price-variation claim recorded with its variance and finance-review explanation.")}>Validate demo PV claim</button> : <Empty text="Award the tender first to activate the contract finance timeline." />}</article>}
+      {page === "Audit trail" && <article className="panel wide"><p className="eyebrow">Immutable accountability trail</p><h2>Every material transition records actor, time, and reason.</h2><div className="timeline">{passport?.timeline.map((item) => <div key={item.id}><Status value={item.event_type} /><b>{label(item.event_type)}</b><p>{item.reason ?? "Recorded lifecycle decision."}</p><small>{new Date(item.at).toLocaleString()}</small></div>) ?? <Empty text="Loading lifecycle events..." />}</div></article>}
+    </section>
+  </main>;
 }
+
+function Login({ busy, notice, signIn }: { busy: boolean; notice: string; signIn: (email: string) => Promise<void> }) { return <main className="login"><header><Link href="/">Bridge<span>TheGap</span></Link><small>Secure fictional demo</small></header><section><p className="eyebrow">Role-based lifecycle workspace</p><h1>Enter from the point where you hold accountability.</h1><p>Each account uses the same seeded password. The backend—not hidden UI controls—enforces authority.</p><div className="login-grid">{demoUsers.map(([name, email, description]) => <button key={email} disabled={busy} onClick={() => void signIn(email)}><b>{name}</b><span>{description}</span><small>{email}</small></button>)}</div><p className="notice">{notice}</p></section></main>; }
+function AssetSummary({ passport }: { passport: Passport | null }) { return <article className="panel"><p className="eyebrow">Permanent asset identity</p><h2>{passport?.asset.name ?? "Loading bridge passport"}</h2><p>{passport?.asset.asset_code} / {passport?.asset.bridge?.route} / {passport?.asset.district}</p><div className="passport-meta"><span><b>Lifecycle</b><Status value={passport?.asset.lifecycle_state ?? "-"} /></span><span><b>Condition</b><Status value={passport?.asset.condition_grade ?? "-"} /></span></div></article>; }
