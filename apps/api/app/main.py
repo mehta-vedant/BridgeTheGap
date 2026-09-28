@@ -1,11 +1,27 @@
-from datetime import UTC, datetime
+from contextlib import asynccontextmanager
+from decimal import Decimal
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
-app = FastAPI(title="R&B Bridge Lifecycle API", version="0.1.0")
+from .database import SessionLocal
+from .models import Bid, Bridge, LifecycleEvent, Project, Tender, User, WorkOrder
+from .security import create_access_token, get_current_user, require_roles, verify_password
+from .seed import seed_demo_data
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    with SessionLocal() as session:
+        seed_demo_data(session)
+    yield
+
+
+app = FastAPI(title="R&B Bridge Lifecycle API", version="0.2.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://bridge-the-gap-dusky.vercel.app", "http://localhost:3000"],
@@ -14,111 +30,238 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-projects = [{"id": "PRJ-001", "name": "Mahi River Bridge Rehabilitation", "status": "TENDER_OPEN", "estimate": 12500000, "division": "Vadodara"}]
-tenders = [{"id": "TEN-001", "project_id": "PRJ-001", "status": "OPEN", "bids": [{"id": "BID-001", "contractor": "Saffron Infrastructure", "amount": 11850000}, {"id": "BID-002", "contractor": "Narmada Works", "amount": 12100000}]}]
-bridges = [{"id": "BRG-001", "name": "Mahi River Bridge", "code": "GJ-RB-042", "service_status": "IN_SERVICE", "maintenance_status": "NONE", "next_inspection": "2026-10-15", "contractor": "Saffron Infrastructure"}]
-events = [{"id": "EVT-001", "bridge_id": "BRG-001", "at": "2026-09-28", "actor": "Executive Engineer", "message": "Demo bridge passport created from handover record."}]
-work_orders: list[dict] = []
+
+class LoginRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=255)
+    password: str = Field(min_length=8, max_length=128)
+
 
 class ProjectCreate(BaseModel):
-    name: str = Field(min_length=3)
-    division: str = Field(min_length=2)
-    estimate: int = Field(gt=0)
+    name: str = Field(min_length=3, max_length=200)
+    division: str = Field(min_length=2, max_length=100)
+    estimate: Decimal = Field(gt=0, max_digits=15, decimal_places=2)
+
 
 class BidCreate(BaseModel):
-    contractor: str = Field(min_length=2)
-    amount: int = Field(gt=0)
+    contractor: str = Field(min_length=2, max_length=160)
+    amount: Decimal = Field(gt=0, max_digits=15, decimal_places=2)
+
 
 class WorkCreate(BaseModel):
-    description: str = Field(min_length=5)
-    contractor: str = Field(min_length=2)
+    description: str = Field(min_length=5, max_length=2000)
+    contractor: str = Field(min_length=2, max_length=160)
 
-def find(items: list[dict], item_id: str) -> dict:
-    item = next((item for item in items if item["id"] == item_id), None)
-    if not item:
-        raise HTTPException(404, "Resource not found")
-    return item
+
+def get_session():
+    with SessionLocal() as session:
+        yield session
+
+
+def new_id(prefix: str) -> str:
+    return f"{prefix}-{uuid4().hex[:8].upper()}"
+
+
+def not_found() -> HTTPException:
+    return HTTPException(status.HTTP_404_NOT_FOUND, "Resource not found")
+
+
+def user_data(user: User) -> dict:
+    return {"id": user.id, "email": user.email, "name": user.name, "role": user.role, "contractor_name": user.contractor_name}
+
+
+def project_data(item: Project) -> dict:
+    return {"id": item.id, "name": item.name, "division": item.division, "estimate": float(item.estimate), "status": item.status}
+
+
+def bridge_data(item: Bridge) -> dict:
+    return {"id": item.id, "name": item.name, "code": item.code, "service_status": item.service_status, "maintenance_status": item.maintenance_status, "next_inspection": item.next_inspection}
+
+
+def work_data(item: WorkOrder) -> dict:
+    return {"id": item.id, "bridge_id": item.bridge_id, "description": item.description, "contractor": item.contractor, "status": item.status}
+
+
+def record_event(session: Session, bridge_id: str, actor: str, message: str) -> LifecycleEvent:
+    event = LifecycleEvent(id=new_id("EVT"), bridge_id=bridge_id, actor=actor, message=message)
+    session.add(event)
+    return event
+
 
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "bridge-lifecycle-api"}
 
+
+@app.post("/api/auth/login")
+def login(payload: LoginRequest, session: Session = Depends(get_session)) -> dict:
+    user = session.scalar(select(User).where(User.email == payload.email.lower()))
+    if not user or not verify_password(payload.password, user.password_hash):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid email or password")
+    return {"access_token": create_access_token(user), "token_type": "bearer", "user": user_data(user)}
+
+
+@app.get("/api/auth/me")
+def me(user: User = Depends(get_current_user)) -> dict:
+    return user_data(user)
+
+
 @app.get("/api/dashboard/summary")
-def dashboard_summary() -> dict:
-    return {"projects": len(projects), "bridges": len(bridges), "attention_required": sum(1 for bridge in bridges if bridge["maintenance_status"] == "ACTION_REQUIRED"), "active_work_orders": sum(1 for work in work_orders if work["status"] != "VERIFIED")}
+def dashboard_summary(_: User = Depends(get_current_user), session: Session = Depends(get_session)) -> dict:
+    return {
+        "projects": session.scalar(select(func.count()).select_from(Project)) or 0,
+        "bridges": session.scalar(select(func.count()).select_from(Bridge)) or 0,
+        "attention_required": session.scalar(select(func.count()).select_from(Bridge).where(Bridge.maintenance_status == "ACTION_REQUIRED")) or 0,
+        "active_work_orders": session.scalar(select(func.count()).select_from(WorkOrder).where(WorkOrder.status != "VERIFIED")) or 0,
+    }
+
 
 @app.get("/api/projects")
-def list_projects() -> list[dict]: return projects
+def list_projects(_: User = Depends(get_current_user), session: Session = Depends(get_session)) -> list[dict]:
+    return [project_data(item) for item in session.scalars(select(Project).order_by(Project.id)).all()]
 
-@app.post("/api/projects", status_code=201)
-def create_project(payload: ProjectCreate) -> dict:
-    project = {"id": f"PRJ-{len(projects)+1:03}", **payload.model_dump(), "status": "NEED_IDENTIFIED"}
-    projects.append(project)
-    return project
+
+@app.post("/api/projects", status_code=status.HTTP_201_CREATED)
+def create_project(payload: ProjectCreate, _: User = Depends(require_roles("MANAGER", "EXECUTIVE_ENGINEER")), session: Session = Depends(get_session)) -> dict:
+    project = Project(id=new_id("PRJ"), **payload.model_dump(), status="NEED_IDENTIFIED")
+    session.add(project)
+    session.commit()
+    return project_data(project)
+
 
 @app.post("/api/projects/{project_id}/approvals")
-def approve_project(project_id: str) -> dict:
-    project = find(projects, project_id)
-    if project["status"] == "TECHNICALLY_SANCTIONED": return project
-    project["status"] = "TECHNICALLY_SANCTIONED"
-    return project
+def approve_project(project_id: str, _: User = Depends(require_roles("MANAGER", "EXECUTIVE_ENGINEER")), session: Session = Depends(get_session)) -> dict:
+    project = session.get(Project, project_id)
+    if not project:
+        raise not_found()
+    if project.status == "TECHNICALLY_SANCTIONED":
+        return project_data(project)
+    if project.status not in {"NEED_IDENTIFIED", "ADMINISTRATIVELY_APPROVED"}:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Project cannot be sanctioned in its current state")
+    project.status = "TECHNICALLY_SANCTIONED"
+    session.commit()
+    return project_data(project)
+
 
 @app.get("/api/tenders/{tender_id}")
-def get_tender(tender_id: str) -> dict: return find(tenders, tender_id)
+def get_tender(tender_id: str, _: User = Depends(get_current_user), session: Session = Depends(get_session)) -> dict:
+    tender = session.get(Tender, tender_id)
+    if not tender:
+        raise not_found()
+    bids = session.scalars(select(Bid).where(Bid.tender_id == tender.id).order_by(Bid.amount)).all()
+    return {"id": tender.id, "project_id": tender.project_id, "status": tender.status, "contract_id": tender.contract_id, "bids": [{"id": bid.id, "contractor": bid.contractor, "amount": float(bid.amount)} for bid in bids]}
 
-@app.post("/api/tenders/{tender_id}/bids", status_code=201)
-def submit_bid(tender_id: str, payload: BidCreate) -> dict:
-    tender = find(tenders, tender_id)
-    if tender["status"] != "OPEN": raise HTTPException(409, "Tender is not open")
-    bid = {"id": f"BID-{uuid4().hex[:6].upper()}", **payload.model_dump()}
-    tender["bids"].append(bid)
-    return bid
+
+@app.post("/api/tenders/{tender_id}/bids", status_code=status.HTTP_201_CREATED)
+def submit_bid(tender_id: str, payload: BidCreate, user: User = Depends(require_roles("CONTRACTOR")), session: Session = Depends(get_session)) -> dict:
+    tender = session.get(Tender, tender_id)
+    if not tender:
+        raise not_found()
+    if tender.status != "OPEN":
+        raise HTTPException(status.HTTP_409_CONFLICT, "Tender is not open")
+    if user.contractor_name and payload.contractor != user.contractor_name:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Contractors can submit bids only for their own organisation")
+    bid = Bid(id=new_id("BID"), tender_id=tender.id, **payload.model_dump())
+    session.add(bid)
+    session.commit()
+    return {"id": bid.id, "contractor": bid.contractor, "amount": float(bid.amount)}
+
 
 @app.post("/api/tenders/{tender_id}/award")
-def award_tender(tender_id: str) -> dict:
-    tender = find(tenders, tender_id)
-    if tender["status"] == "AWARDED": return tender
-    winner = min(tender["bids"], key=lambda bid: bid["amount"])
-    tender.update({"status": "AWARDED", "awarded_bid": winner, "contract_id": f"CON-{tender_id[-3:]}"})
-    project = find(projects, tender["project_id"]); project["status"] = "AWARDED"
-    return tender
+def award_tender(tender_id: str, user: User = Depends(require_roles("MANAGER", "EXECUTIVE_ENGINEER")), session: Session = Depends(get_session)) -> dict:
+    tender = session.get(Tender, tender_id)
+    if not tender:
+        raise not_found()
+    if tender.status == "AWARDED":
+        return get_tender(tender_id, user, session)
+    if tender.status != "OPEN":
+        raise HTTPException(status.HTTP_409_CONFLICT, "Tender cannot be awarded in its current state")
+    winner = session.scalar(select(Bid).where(Bid.tender_id == tender.id).order_by(Bid.amount).limit(1))
+    if not winner:
+        raise HTTPException(status.HTTP_409_CONFLICT, "At least one bid is required before award")
+    tender.status = "AWARDED"
+    tender.contract_id = new_id("CON")
+    project = session.get(Project, tender.project_id)
+    if project:
+        project.status = "AWARDED"
+    session.commit()
+    return get_tender(tender_id, user, session)
+
 
 @app.get("/api/bridges")
-def list_bridges() -> list[dict]: return bridges
+def list_bridges(_: User = Depends(get_current_user), session: Session = Depends(get_session)) -> list[dict]:
+    return [bridge_data(item) for item in session.scalars(select(Bridge).order_by(Bridge.code)).all()]
+
 
 @app.get("/api/bridges/{bridge_id}/timeline")
-def timeline(bridge_id: str) -> list[dict]:
-    find(bridges, bridge_id)
-    return [event for event in events if event["bridge_id"] == bridge_id]
+def timeline(bridge_id: str, _: User = Depends(get_current_user), session: Session = Depends(get_session)) -> list[dict]:
+    if not session.get(Bridge, bridge_id):
+        raise not_found()
+    events = session.scalars(select(LifecycleEvent).where(LifecycleEvent.bridge_id == bridge_id).order_by(LifecycleEvent.created_at)).all()
+    return [{"id": event.id, "bridge_id": event.bridge_id, "at": event.created_at.date().isoformat(), "actor": event.actor, "message": event.message} for event in events]
+
+
+@app.get("/api/bridges/{bridge_id}/work-orders")
+def list_work_orders(bridge_id: str, _: User = Depends(get_current_user), session: Session = Depends(get_session)) -> list[dict]:
+    if not session.get(Bridge, bridge_id):
+        raise not_found()
+    return [work_data(item) for item in session.scalars(select(WorkOrder).where(WorkOrder.bridge_id == bridge_id).order_by(WorkOrder.id)).all()]
+
 
 @app.post("/api/bridges/{bridge_id}/inspections")
-def submit_inspection(bridge_id: str, requires_disposition: bool = True) -> dict:
-    bridge = find(bridges, bridge_id)
-    bridge["maintenance_status"] = "ACTION_REQUIRED" if requires_disposition else "NONE"
-    event = {"id": f"EVT-{uuid4().hex[:6]}", "bridge_id": bridge_id, "at": str(datetime.now(UTC).date()), "actor": "Inspector", "message": "Inspection submitted; engineering disposition required." if requires_disposition else "Inspection submitted with no action required."}
-    events.append(event)
-    return {"bridge": bridge, "event": event}
+def submit_inspection(bridge_id: str, requires_disposition: bool = True, user: User = Depends(require_roles("INSPECTOR")), session: Session = Depends(get_session)) -> dict:
+    bridge = session.get(Bridge, bridge_id)
+    if not bridge:
+        raise not_found()
+    bridge.maintenance_status = "ACTION_REQUIRED" if requires_disposition else "NONE"
+    event = record_event(session, bridge_id, user.name, "Inspection submitted; engineering disposition required." if requires_disposition else "Inspection submitted with no action required.")
+    session.commit()
+    return {"bridge": bridge_data(bridge), "event": {"id": event.id, "at": event.created_at.date().isoformat(), "actor": event.actor, "message": event.message}}
 
-@app.post("/api/bridges/{bridge_id}/work-orders", status_code=201)
-def create_work_order(bridge_id: str, payload: WorkCreate) -> dict:
-    bridge = find(bridges, bridge_id)
-    if bridge["maintenance_status"] != "ACTION_REQUIRED": raise HTTPException(409, "No disposition-required finding")
-    work = {"id": f"WO-{len(work_orders)+1:03}", "bridge_id": bridge_id, **payload.model_dump(), "status": "APPROVED"}
-    work_orders.append(work); bridge["maintenance_status"] = "WORK_APPROVED"
-    events.append({"id": f"EVT-{uuid4().hex[:6]}", "bridge_id": bridge_id, "at": str(datetime.now(UTC).date()), "actor": "Executive Engineer", "message": f"Work order {work['id']} approved."})
-    return work
+
+@app.post("/api/bridges/{bridge_id}/work-orders", status_code=status.HTTP_201_CREATED)
+def create_work_order(bridge_id: str, payload: WorkCreate, user: User = Depends(require_roles("MANAGER", "EXECUTIVE_ENGINEER")), session: Session = Depends(get_session)) -> dict:
+    bridge = session.get(Bridge, bridge_id)
+    if not bridge:
+        raise not_found()
+    if bridge.maintenance_status != "ACTION_REQUIRED":
+        raise HTTPException(status.HTTP_409_CONFLICT, "No disposition-required finding")
+    work = WorkOrder(id=new_id("WO"), bridge_id=bridge_id, **payload.model_dump(), status="APPROVED")
+    bridge.maintenance_status = "WORK_APPROVED"
+    session.add(work)
+    record_event(session, bridge_id, user.name, f"Work order {work.id} approved.")
+    session.commit()
+    return work_data(work)
+
 
 @app.post("/api/work-orders/{work_id}/complete")
-def complete_work(work_id: str) -> dict:
-    work = find(work_orders, work_id)
-    if work["status"] == "VERIFIED": raise HTTPException(409, "Verified work cannot be completed again")
-    work["status"] = "VERIFICATION_PENDING"; return work
+def complete_work(work_id: str, user: User = Depends(require_roles("CONTRACTOR")), session: Session = Depends(get_session)) -> dict:
+    work = session.get(WorkOrder, work_id)
+    if not work:
+        raise not_found()
+    if user.contractor_name != work.contractor:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Contractors can complete only their assigned work")
+    if work.status == "VERIFIED":
+        raise HTTPException(status.HTTP_409_CONFLICT, "Verified work cannot be completed again")
+    if work.status == "VERIFICATION_PENDING":
+        return work_data(work)
+    work.status = "VERIFICATION_PENDING"
+    session.commit()
+    return work_data(work)
+
 
 @app.post("/api/work-orders/{work_id}/verify")
-def verify_work(work_id: str) -> dict:
-    work = find(work_orders, work_id)
-    if work["status"] == "VERIFIED": return work
-    if work["status"] != "VERIFICATION_PENDING": raise HTTPException(409, "Completion is required before verification")
-    work["status"] = "VERIFIED"; bridge = find(bridges, work["bridge_id"]); bridge["maintenance_status"] = "NONE"
-    events.append({"id": f"EVT-{uuid4().hex[:6]}", "bridge_id": bridge["id"], "at": str(datetime.now(UTC).date()), "actor": "Executive Engineer", "message": f"Work order {work_id} independently verified."})
-    return work
+def verify_work(work_id: str, user: User = Depends(require_roles("INSPECTOR", "EXECUTIVE_ENGINEER")), session: Session = Depends(get_session)) -> dict:
+    work = session.get(WorkOrder, work_id)
+    if not work:
+        raise not_found()
+    if work.status == "VERIFIED":
+        return work_data(work)
+    if work.status != "VERIFICATION_PENDING":
+        raise HTTPException(status.HTTP_409_CONFLICT, "Completion is required before verification")
+    work.status = "VERIFIED"
+    bridge = session.get(Bridge, work.bridge_id)
+    if bridge:
+        bridge.maintenance_status = "NONE"
+    record_event(session, work.bridge_id, user.name, f"Work order {work_id} independently verified.")
+    session.commit()
+    return work_data(work)

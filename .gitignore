@@ -32,6 +32,7 @@ Thumbs.db
 # Local data
 *.sqlite
 *.sqlite3
+*.db
 
 # Playwright
 playwright-report/
